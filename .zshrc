@@ -13,7 +13,7 @@ export ZSH="/Users/$USER/.oh-my-zsh"
 ZSH_THEME="robbyrussell"
 
 # Plugins #
-plugins=(git thefuck)
+plugins=(git thefuck zsh-autosuggestions zsh-syntax-highlighting)
 
 # Source #
 source $ZSH/oh-my-zsh.sh

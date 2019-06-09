@@ -40,6 +40,15 @@ alias lock="/System/Library/CoreServices/Menu\ Extras/user.menu/Contents/Resourc
 alias pmsa="pmset -g assertions"
 alias flushdns="sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder"
 alias ports="lsof -i -P"
+alias -g G="| grep -i" 
+alias g="git"
+alias ga="git add"
+alias gs="git status"
+alias gp="git push"
+alias gpro="git push remote origin"
+alias gf="git fetch"
+alias gfo="git fetch origin"
+alias gcm="git commit -m"
 
 # Goto
 alias /="cd /"

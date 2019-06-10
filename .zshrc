@@ -2,7 +2,7 @@
 uname -mnprs # Print OS Name, machine name, OS release, hardware name, architecture.
 uptime
 
-# Paths #.
+# Paths #
 export PATH=/usr/local/bin:$PATH
 export ZSH="/Users/$USER/.oh-my-zsh"
 
@@ -17,6 +17,10 @@ plugins=(git thefuck zsh-autosuggestions zsh-syntax-highlighting)
 
 # Source #
 source $ZSH/oh-my-zsh.sh
+source $ZSH/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# Syntax highlighting #
+ZSH_HIGHLIGHT_STYLES[globbing]=fg=99 # SlateBlue1
 
 # History timestamp #
 HIST_STAMPS="yyyy-mm-dd"

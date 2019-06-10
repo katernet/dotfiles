@@ -15,6 +15,9 @@ ZSH_THEME="robbyrussell"
 # Plugins #
 plugins=(git thefuck zsh-autosuggestions zsh-syntax-highlighting z)
 
+# History #
+HISTFILE="$ZSH/zfiles/.zsh_history"
+
 # Source #
 source $ZSH/oh-my-zsh.sh
 source $ZSH/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
@@ -22,58 +25,47 @@ source $ZSH/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 # Syntax highlighting #
 ZSH_HIGHLIGHT_STYLES[globbing]=fg=99 # SlateBlue1
 
-# History timestamp #
-HIST_STAMPS="yyyy-mm-dd"
-
-# Change zcompdump dir #
-compinit -d ~/.oh-my-zsh/zcompdump/zcompdump-$(hostname)-$ZSH_VERSION
+# zfiles #
+compinit -d $ZSH/zfiles/zcompdump-$(hostname)-$ZSH_VERSION
+_Z_DATA="$ZSH/zfiles/.z"
 
 # Aliases #
-alias zshrc="nano ~/.zshrc"
-
-# Cmds
+alias .="pwd"
 alias lsl="ls -l"
 alias lsal="ls -al"
 alias lsl@="ls -l@"
-alias .="pwd"
-alias ..="cd .."
-alias ...="cd ../../"
+alias zshrc="nano ~/.zshrc"
+alias szshrc="source ~/.zshrc"
+alias history="fc -li 1"
+alias -g G="| grep -i"
+alias gs="git status"
+alias gpom="git push origin master"
+alias gpob="git push origin $(current_branch)"
+
+# Mac
 alias doff="pmset displaysleepnow; echo Display has been turned off!"
 alias sleep="pmset sleepnow; echo Sleeping machine now!"
 alias lock="/System/Library/CoreServices/Menu\ Extras/user.menu/Contents/Resources/CGSession -suspend"
 alias pmsa="pmset -g assertions"
 alias flushdns="sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder"
 alias ports="lsof -i -P"
-alias -g G="| grep -i" 
-alias g="git"
-alias ga="git add"
-alias gs="git status"
-alias gp="git push"
-alias gpom="git push origin master"
-alias gf="git fetch"
-alias gfo="git fetch origin"
-alias gcm="git commit -m"
 
 # Goto
-alias /="cd /"
-alias ~="cd ~"
-alias desk="cd ~/Desktop"
-alias apps="cd /Applications"
-alias ~lib="cd ~/Library"
-alias lib="cd /Library"
-alias ~prefs=" cd ~/Library/Preferences"
-alias prefs="cd /Library/Preferences"
-alias ~scripts="cd ~/Library/Scripts"
-alias scripts="cd "/Library/Scripts/$(hostname) Scripts""
-alias soul="cd /"
-alias dreamer="cd /Volumes/Dreamer"
-alias docs="cd /Volumes/Dreamer/Documents"
-alias dl="cd /Volumes/Dreamer/Downloads"
-alias downloads="cd /Volumes/Dreamer/Downloads"
-alias dropbox="cd /Volumes/Dreamer/Documents/Dropbox"
-alias stuff="cd /Volumes/Dreamer/Documents/Stuff"
-alias backup="cd /Volumes/Reality"
-alias latestbak="cd /Volumes/Reality/Backups.backupdb/$(hostname)/Latest"
-alias clover="cd /Volumes/EFI/EFI/CLOVER"
-alias tmpdir="cd $TMPDIR"
-alias tmp="cd /private/tmp"
+alias omz="~/.oh-my-zsh"
+alias desk="~/Desktop"
+alias apps="/Applications"
+alias ~lib="~/Library"
+alias lib="/Library"
+alias ~prefs="~/Library/Preferences"
+alias ~scripts="~/Library/Scripts"
+alias scripts="/Library/Scripts/$(hostname)\ Scripts"
+alias dreamer="/Volumes/Dreamer"
+alias docs="/Volumes/Dreamer/Documents"
+alias dl="/Volumes/Dreamer/Downloads"
+alias dropbox="/Volumes/Dreamer/Documents/Dropbox"
+alias stuff="/Volumes/Dreamer/Documents/Stuff"
+alias backup="/Volumes/Reality"
+alias latestbak="/Volumes/Reality/Backups.backupdb/$(hostname)/Latest"
+alias clover="/Volumes/EFI/EFI/CLOVER"
+alias tmpdir="$TMPDIR"
+alias tmp="/private/tmp"

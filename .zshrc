@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 # Greeting #
 uname -mnprs # Print OS Name, machine name, OS release, hardware name, architecture.
 uptime
@@ -7,10 +9,10 @@ export PATH=/usr/local/bin:$PATH
 export ZSH="/Users/$USER/.oh-my-zsh"
 
 # Prompt #
-#PS1="%n@%m %{%F{green}%}%(5~|%-1~/…/%2~|%4~) %{%f%}%% " # Disabled now in ~/.oh-my-zsh/themes/robbyrussell.zsh-theme
+#PS1="%n@%m %F{green}%(5~|%-1~/…/%2~|%4~)%f $(git_prompt_info)%(?.%#.%F{red}%#%f) " # Disabled now in $ZSH/custom/themes/my.zsh-theme
 
 # Theme #
-ZSH_THEME="robbyrussell"
+ZSH_THEME="me"
 
 # Plugins #
 plugins=(git thefuck zsh-autosuggestions zsh-syntax-highlighting z)
@@ -18,15 +20,15 @@ plugins=(git thefuck zsh-autosuggestions zsh-syntax-highlighting z)
 # History #
 HISTFILE="$ZSH/zfiles/.zsh_history"
 
-# Source #
-source $ZSH/oh-my-zsh.sh
-source $ZSH/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# Sources #
+source "$ZSH"/oh-my-zsh.sh
+source "$ZSH"/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 # Syntax highlighting #
 ZSH_HIGHLIGHT_STYLES[globbing]=fg=99 # SlateBlue1
 
 # zfiles #
-compinit -d $ZSH/zfiles/zcompdump-$(hostname)-$ZSH_VERSION
+compinit -d "$ZSH"/zfiles/zcompdump-$(hostname)-$ZSH_VERSION
 _Z_DATA="$ZSH/zfiles/.z"
 
 # Aliases #
@@ -34,7 +36,8 @@ alias .="pwd"
 alias lsl="ls -l"
 alias lsal="ls -al"
 alias lsl@="ls -l@"
-alias zshrc="nano ~/.zshrc"
+alias lsal@="ls -al@"
+alias zshrc="mate ~/.zshrc"
 alias szshrc="source ~/.zshrc"
 alias history="fc -li 1"
 alias -g G="| grep -i"
@@ -67,5 +70,5 @@ alias stuff="/Volumes/Dreamer/Documents/Stuff"
 alias backup="/Volumes/Reality"
 alias latestbak="/Volumes/Reality/Backups.backupdb/$(hostname)/Latest"
 alias clover="/Volumes/EFI/EFI/CLOVER"
-alias tmpdir="$TMPDIR"
+alias tmpdir="'$TMPDIR'"
 alias tmp="/private/tmp"

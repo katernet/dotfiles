@@ -1,12 +1,14 @@
 #!/bin/zsh
 
 # Greeting #
-uname -mnprs # Print OS Name, machine name, OS release, hardware name, architecture.
-uptime
+if [[ $UID = 501 ]]; then # Only show greeting for user account
+	uname -mnprs # Print OS Name, machine name, OS release, hardware name, architecture.
+	uptime
+fi
 
 # Paths #
 export PATH=/usr/local/bin:$PATH
-export ZSH="/Users/$USER/.oh-my-zsh"
+export ZSH=/Users/$(id -nu 501)/.oh-my-zsh
 
 # Prompt #
 #PS1="%n@%m %F{green}%(5~|%-1~/…/%2~|%4~)%f $(git_prompt_info)%(?.%#.%F{red}%#%f) " # Disabled now in $ZSH/custom/themes/my.zsh-theme
@@ -20,6 +22,9 @@ plugins=(git thefuck zsh-autosuggestions zsh-syntax-highlighting z)
 # History #
 HISTFILE="$ZSH/zfiles/.zsh_history"
 
+# Disable compfix #
+[[ $UID = 0 ]] && ZSH_DISABLE_COMPFIX=true # https://github.com/robbyrussell/oh-my-zsh/issues/6939
+
 # Sources #
 source "$ZSH"/oh-my-zsh.sh
 source "$ZSH"/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
@@ -28,7 +33,7 @@ source "$ZSH"/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 ZSH_HIGHLIGHT_STYLES[globbing]=fg=99 # SlateBlue1
 
 # zfiles #
-compinit -d "$ZSH"/zfiles/zcompdump-$(hostname)-$ZSH_VERSION
+compinit -i -d "$ZSH"/zfiles/zcompdump-$(hostname)-$ZSH_VERSION
 _Z_DATA="$ZSH/zfiles/.z"
 
 # Aliases #
@@ -37,6 +42,7 @@ alias lsl="ls -l"
 alias lsal="ls -al"
 alias lsl@="ls -l@"
 alias lsal@="ls -al@"
+alias suroot="sudo -E -s"
 alias zshrc="mate ~/.zshrc"
 alias szshrc="source ~/.zshrc"
 alias history="fc -li 1"

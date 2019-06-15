@@ -27,12 +27,13 @@ restore)
 	# Install casks from backup
 	installCasks() {
 		printf "\nInstalling casks...\n"
+		brew tap homebrew/cask-fonts # Tap into font caskroom
 		for i in $(cat $DIR/casks); do
 			if ! sudo -u rich brew cask list --versions $i; then
 				/usr/local/bin/brew cask install $i # Install cask
 			fi
 		done
-		printf "\nInstalled brews!\n"
+		printf "\nInstalled casks!\n"
 	}
 
 	# Check for Homebrew, install if we don't have it.

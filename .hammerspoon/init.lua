@@ -53,22 +53,17 @@ hs.hotkey.bind(mash, 'P', openSpotify)
 hs.hotkey.bind(mash, 'I', openiTunes)
 hs.hotkey.bind(mash, 'T', openiTerm)
 
--- Event for Eject key (WIP) - Attempt to fix ctrl+shift+eject not working with Karabiner installed 
-hs.eventtap.new({hs.eventtap.event.types.NSSystemDefined},
-function(event)
-    -- http://www.hammerspoon.org/docs/hs.eventtap.event.html#systemKey
-   event = event:systemKey()
-    -- http://stackoverflow.com/a/1252776/1521064
-   --local next = next
-    -- Check empty table
-   --if next(event) then
-	
-		  if event.key == 'EJECT' and event.down then
-		      print('This is my EJECT key event')
-				--os.execute("pmset displaysleepnow")
-		  end
-	  
-   --end
+-- Event for Ctrl+Shift+Eject to sleep display (Karabiner Elements breaks this shortcut)
+hs.eventtap.new({ hs.eventtap.event.types.flagsChanged }, function(eventCS) -- Ctrl+Shift
+	local flagsCS = eventCS:getFlags()
+	if flagsCS.ctrl and flagsCS.shift then
+		hs.eventtap.new({ hs.eventtap.event.types.NSSystemDefined }, function(eventE) -- Eject
+			local flagsE = eventE:systemKey()
+			if flagsE.key == 'EJECT' and flagsE.down then
+				-- TODO: This runs incrementally
+				os.execute("pmset displaysleepnow")
+				--
+			end
+		end):start()
+	end
 end):start()
-
-

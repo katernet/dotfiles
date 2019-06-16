@@ -53,17 +53,22 @@ hs.hotkey.bind(mash, 'P', openSpotify)
 hs.hotkey.bind(mash, 'I', openiTunes)
 hs.hotkey.bind(mash, 'T', openiTerm)
 
--- Event for Ctrl+Shift+Eject to sleep display (Karabiner Elements breaks this shortcut)
-hs.eventtap.new({ hs.eventtap.event.types.flagsChanged }, function(eventCS) -- Ctrl+Shift
-	local flagsCS = eventCS:getFlags()
-	if flagsCS.ctrl and flagsCS.shift then
-		hs.eventtap.new({ hs.eventtap.event.types.NSSystemDefined }, function(eventE) -- Eject
-			local flagsE = eventE:systemKey()
-			if flagsE.key == 'EJECT' and flagsE.down then
-				-- TODO: This runs incrementally
-				os.execute("pmset displaysleepnow")
-				--
-			end
-		end):start()
+-- Power events for eject key (broken in Karabiner-Elements)
+powerEventTap = hs.eventtap.new({ hs.eventtap.event.types.flagsChanged, hs.eventtap.event.types.NSSystemDefined }, function(event)
+local flags = hs.eventtap.checkKeyboardModifiers()
+local systemKey = event:systemKey()
+	if flags.ctrl and flags.shift and systemKey.key == "EJECT" and systemKey.down and not systemKey["repeat"] then
+		os.execute("pmset displaysleepnow") -- Sleep display
+		return true
+	end
+	if flags.alt and flags.cmd and systemKey.key == "EJECT" and systemKey.down and not systemKey["repeat"] then
+		os.execute("pmset sleepnow") -- Sleep system
+		return true
+	end
+	if flags.ctrl and flags.cmd and systemKey.key == "EJECT" and systemKey.down and not systemKey["repeat"] then
+		hs.osascript.applescript([[
+    			tell app "System Events" to shut down
+		]]) -- Restart system
+		return true
 	end
 end):start()

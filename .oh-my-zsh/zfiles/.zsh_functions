@@ -1,0 +1,28 @@
+findstr() {
+	if [[ $# == 1 ]]; then
+		find . -type f -exec grep "$1" /dev/null {} \; # Current directory
+	elif [[ $# == 2 ]]; then
+		find "$1" -type f -exec grep "$2" /dev/null {} \; # Directory specified in 1st arg
+	fi
+}
+# Backup file
+bu() {
+	if [[ $# == 1 ]]; then
+		if [[ $1 == log ]]; then
+			cat "$ZSH"/zfiles/filebackup.log # Print file backup log
+		elif [[ $1 == logclear ]]; then
+			rm "$ZSH"/zfiles/filebackup.log # Remove file backup log
+		else
+			cp -ip "$1" "$1".backup_"$(date +%Y%m%d)" # Backup file with date in filename
+		fi
+	elif [[ $# == 2 ]] && [[ $1 == log ]]; then
+		# Backup file with date in filename and log backup
+		cp -ip "$2" "$2".backup_"$(date +%Y%m%d)" && echo "$(date "+%Y-%m-%d %T") bu: $PWD/$1" >> "$ZSH"/zfiles/zfilebackup.log
+	fi
+}
+# Git add file 1st arg, commit message 2nd arg and push.
+gacp() {
+	git add "$1"
+	git commit -m "$2"
+	git push
+}

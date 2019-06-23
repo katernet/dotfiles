@@ -9,8 +9,8 @@ PS1='%n@%m %F{green}%(5~|%-1~/…/%2~|%4~)%f $(git_prompt_info)%(?.%#.%F{red}%#%
 
 # Title
 precmd() {
-        print -Pn "\e]2;%n@%m: %~\a"    # Window
-        print -Pn "\e]1;%15<..<%~%<<\a" # Tab
+        print -Pn "\e]2;%n@%m: %15<…<%~%<<\a" 	# Window
+        print -Pn "\e]1;%15<..<%~%<<\a" 	# Tab
 }
 
 ZSH_THEME_GIT_PROMPT_PREFIX="\ue725 %{$fg_bold[red]%}"

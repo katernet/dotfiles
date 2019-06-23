@@ -12,6 +12,13 @@ backup)
 	/usr/local/bin/brew cask list > $DIR/casks # Backup brew casks
 	;;
 	
+update)
+	brew update 		# Update formulae
+	brew upgrade 		# Upgrade everthing
+	brew cask upgrade 	# Upgrade casks
+	brew cleanup -s 	# Clean old versions and cache
+	;;
+
 restore)
 	# Install packages from backup
 	installBrews() {

@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 DIR=~/.brew # Init directory
 
@@ -38,7 +38,7 @@ restore)
 
 	# Check for Homebrew, install if we don't have it.
 	if test ! $(which brew); then
-		read -p "Install Homebrew and your brew apps? [y/n] " prompt
+		read -p "Homebrew is not installed. Install? [y/n] " prompt
 		if [[ $prompt =~ [yY](es)* ]]; then
 			printf "\nInstalling Homebrew...\n"
 			ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"

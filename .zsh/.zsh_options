@@ -1,0 +1,24 @@
+# Opt
+setopt always_to_end 					# Cursor placed at end after completion
+setopt auto_cd 								# Change directory without cd
+setopt auto_menu 							# Show completion menu on successive tab press
+setopt auto_pushd 						# Make cd push the old directory onto the directory stack
+setopt pushdignoredups 				# Don’t push multiple copies of the same directory onto the directory stack
+setopt pushdminus 						# Exchanges meanings of + and - with a number specified directory in the stack
+setopt complete_in_word 			# Allow completion from within a word/phrase
+setopt extended_history				# Record timestamp of command in HISTFILE
+setopt hist_expire_dups_first	# Delete duplicates first when HISTFILE size exceeds HISTSIZE
+setopt hist_ignore_dups 			# Ignore duplicated commands history list
+setopt hist_ignore_space 			# Ignore commands that start with space
+setopt inc_append_history 		# Add commands to HISTFILE in order of execution
+setopt prompt_subst 					# Allow expansion in prompts
+unsetopt flowcontrol 					# Output flow control via start/stop characters is disabled in the shell’s editor
+unsetopt histverify 					# Disable confirmation in expansion
+unsetopt menu_complete 				# Do not autoselect the first completion entry
+
+# History
+HISTSIZE=50000
+SAVEHIST=10000
+
+# Keybinds #
+bindkey "^[[3~" delete-char # Del key to delete

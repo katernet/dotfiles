@@ -1,0 +1,58 @@
+# Colors
+autoload -U colors
+colors
+
+export LSCOLORS="Gxfxcxdxbxegedabagacad" # ls colors
+
+# Prompt
+PS1='%n@%m %F{green}%(5~|%-1~/…/%2~|%4~)%f $(git_prompt_info)%(?.%#.%F{red}%#%f) '
+
+# Title
+precmd() {
+        print -Pn "\e]2;%n@%m: %~\a"    # Window
+        print -Pn "\e]1;%15<..<%~%<<\a" # Tab
+}
+
+ZSH_THEME_GIT_PROMPT_PREFIX="\ue725 %{$fg_bold[red]%}"
+ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%} "
+ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[red]%}✘"
+ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[green]%}✔"
+ZSH_THEME_GIT_PROMPT_ADDED="%{$fg[yellow]%}✚"
+ZSH_THEME_GIT_PROMPT_UNMERGED="%{$fg[white]%}§"
+
+# Checks status of working tree
+function git_status() {
+	local STATUS=$(git status --porcelain 2>/dev/null)
+	if $(echo "$STATUS" | grep '^A ' &> /dev/null); then
+		echo "$ZSH_THEME_GIT_PROMPT_ADDED"
+	elif $(echo "$STATUS" | grep '^M ' &> /dev/null); then
+		echo "$ZSH_THEME_GIT_PROMPT_ADDED"
+	elif $(echo "$STATUS" | grep '^MM ' &> /dev/null); then
+		echo "$ZSH_THEME_GIT_PROMPT_ADDED"
+	elif $(echo "$STATUS" | grep '^U ' &>/dev/null); then
+		echo "$ZSH_THEME_GIT_PROMPT_UNMERGED"
+	elif [[ -n "$STATUS" ]]; then
+		echo "$ZSH_THEME_GIT_PROMPT_DIRTY"
+	else
+		echo "$ZSH_THEME_GIT_PROMPT_CLEAN"
+	fi
+}
+
+# Outputs current git branch info into prompt
+function git_prompt_info() {
+        [[ $UID = 0 ]] && return 0 # No git prompt for root user
+        local ref
+	ref=$(git symbolic-ref HEAD 2>/dev/null) || return 0
+        echo "$ZSH_THEME_GIT_PROMPT_PREFIX${ref#refs/heads/} $(git_status)$ZSH_THEME_GIT_PROMPT_SUFFIX"
+}
+
+# Outputs the name of the current branch
+function git_current_branch() {
+	local ref
+	ref=$(git symbolic-ref HEAD 2>/dev/null)
+	if [[ $? != 0 ]]; then
+		[[ $? == 128 ]] && return 0 # No git repo
+		ref=$(git rev-parse --short HEAD 2> /dev/null) || return
+	fi
+	echo ${ref#refs/heads/}
+}

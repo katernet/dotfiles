@@ -1,0 +1,70 @@
+# Navigation
+alias .='pwd'
+alias -g ...='../..'
+alias -g ....='../../..'
+alias -g .....='../../../..'
+alias -g ......='../../../../..'
+alias -- -='cd -'
+alias 1='cd -'
+alias 2='cd -2'
+alias 3='cd -3'
+alias 4='cd -4'
+alias 5='cd -5'
+alias 6='cd -6'
+alias 7='cd -7'
+alias 8='cd -8'
+alias 9='cd -9'
+alias l='ls -lahG'
+alias ll='ls -lhG'
+alias l@='ls -la@G'
+alias lR='ls -lR'
+alias lt='ls -lt'
+alias lu='ls -lu'
+function d () {
+  if [[ -n $1 ]]; then
+    dirs "$@"
+  else
+    dirs -v | head -10
+  fi
+}
+compdef _dirs d
+
+# Cmds
+alias md='mkdir -p'
+alias rd=rmdir
+alias zshrc='mate ~/.zshrc'
+alias szshrc='source ~/.zshrc'
+alias suroot='sudo -E -s'
+alias {history,hist}=' fc -li 1 | less +G' # Space stops write to history (setopt hist_ignore_space)
+alias -g G='| grep -i'
+alias gs='git status'
+alias gpom='git push origin master'
+alias gpob='git push origin $(current_branch)'
+alias exitcode='echo ${1:-$(print -P %?)}'
+
+# Mac
+alias doff='pmset displaysleepnow; echo Display has been turned off!'
+alias lock='/System/Library/CoreServices/Menu\ Extras/user.menu/Contents/Resources/CGSession -suspend'
+alias pmsa='pmset -g assertions'
+alias flushdns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder'
+alias ports='lsof -i -P'
+alias rmdss='find . -name ".DS_Store" -print -delete'
+
+# Goto
+alias desk='~/Desktop'
+alias apps='/Applications'
+alias ~lib='~/Library'
+alias lib='/Library'
+alias ~prefs='~/Library/Preferences'
+alias ~scripts='~/Library/Scripts'
+alias scripts='/Library/Scripts/$(hostname)\ Scripts'
+alias dreamer='/Volumes/Dreamer'
+alias docs='/Volumes/Dreamer/Documents'
+alias dl='/Volumes/Dreamer/Downloads'
+alias dropbox='/Volumes/Dreamer/Documents/Dropbox'
+alias stuff='/Volumes/Dreamer/Documents/Stuff'
+alias backup='/Volumes/Reality'
+alias latestbak='/Volumes/Reality/Backups.backupdb/$(hostname)/Latest'
+alias clover='/Volumes/EFI/EFI/CLOVER'
+alias tmpdir='"$TMPDIR"'
+alias tmp='/private/tmp'

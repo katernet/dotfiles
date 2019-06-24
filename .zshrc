@@ -17,12 +17,3 @@ source "$ZSH"/.zsh_completion
 source "$ZSH"/.zsh_aliases
 source "$ZSH"/.zsh_functions
 source "$ZSH"/.zsh_options
-
-# Custom syntax highlighting #
-ZSH_HIGHLIGHT_STYLES[globbing]=fg=99 # SlateBlue1
-ZSH_HIGHLIGHT_STYLES[history-expansion]=fg=99
-zle_highlight+=(paste:none) # Disable paste highlighting
-
-# z files #
-HISTFILE="$ZSH"/.zsh_history
-_Z_DATA="$ZSH"/.z

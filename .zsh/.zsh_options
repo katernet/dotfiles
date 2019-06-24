@@ -17,6 +17,7 @@ unsetopt histverify 		# Disable confirmation in expansion
 unsetopt menu_complete 		# Do not autoselect the first completion entry
 
 # History
+HISTFILE="$ZSH"/.zsh_history
 HISTSIZE=50000
 SAVEHIST=10000
 
@@ -24,3 +25,11 @@ SAVEHIST=10000
 bindkey "^[[3~" delete-char # Del key to delete
 bindkey "^[[A" up-line-or-beginning-search # Up arrow history search
 bindkey "^[[B" down-line-or-beginning-search # Down arrow history search
+
+# Custom syntax highlighting #
+ZSH_HIGHLIGHT_STYLES[globbing]=fg=99 # SlateBlue1
+ZSH_HIGHLIGHT_STYLES[history-expansion]=fg=99
+zle_highlight+=(paste:none) # Disable paste highlighting
+
+# z files #
+_Z_DATA="$ZSH"/.z

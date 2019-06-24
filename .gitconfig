@@ -1,0 +1,11 @@
+[user]
+	email = 37143923+katernet@users.noreply.github.com
+	name = katernet
+	signingkey = D0454A980EB8F3D1
+[core]
+[core]
+	editor = mate
+[commit]
+	gpgsign = true
+[gpg]
+	program = gpg

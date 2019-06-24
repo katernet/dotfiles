@@ -6,6 +6,7 @@
 # Paths #
 export PATH=/usr/local/bin:/usr/local/sbin:$PATH
 export ZSH=/Users/$(id -nu 501)/.zsh
+export GPG_TTY=$(tty) # GPG signing
 
 # Sources #
 source "$ZSH"/.zsh_prompt

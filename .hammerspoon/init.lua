@@ -28,23 +28,23 @@ sleepWatcher:start()
 
 -- Open apps
 function openSafari()
-  application.launchOrFocus("Safari")
+	application.launchOrFocus("Safari")
 end
 
 function openMessages()
-  application.launchOrFocus("Messages")
+	application.launchOrFocus("Messages")
 end
 
 function openSpotify()
-  application.launchOrFocus("Spotify")
+	application.launchOrFocus("Spotify")
 end
 
 function openiTunes()
-  application.launchOrFocus("iTunes")
+	application.launchOrFocus("iTunes")
 end
 
 function openiTerm()
-  application.launchOrFocus("iTerm")
+	application.launchOrFocus("iTerm")
 end
 
 hs.hotkey.bind(mash, 'S', openSafari)
@@ -61,14 +61,16 @@ local systemKey = event:systemKey()
 		os.execute("pmset displaysleepnow") -- Sleep display
 		return true
 	end
+	if flags.ctrl and flags.alt and flags.cmd and systemKey.key == "EJECT" and systemKey.down and not systemKey["repeat"] then
+		hs.osascript.applescript([[ tell app "System Events" to shut down ]]) -- Shutdown
+		return true
+	end
 	if flags.alt and flags.cmd and systemKey.key == "EJECT" and systemKey.down and not systemKey["repeat"] then
-		os.execute("pmset sleepnow") -- Sleep system
+		os.execute("pmset sleepnow") -- Sleep
 		return true
 	end
 	if flags.ctrl and flags.cmd and systemKey.key == "EJECT" and systemKey.down and not systemKey["repeat"] then
-		hs.osascript.applescript([[
-    			tell app "System Events" to shut down
-		]]) -- Restart system
+		hs.osascript.applescript([[ tell app "System Events" to restart ]]) -- Restart
 		return true
 	end
 end):start()

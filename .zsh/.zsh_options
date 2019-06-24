@@ -20,5 +20,7 @@ unsetopt menu_complete 		# Do not autoselect the first completion entry
 HISTSIZE=50000
 SAVEHIST=10000
 
-# Keybinds #
+# Keybinds
 bindkey "^[[3~" delete-char # Del key to delete
+bindkey "^[[A" up-line-or-beginning-search # Up arrow history search
+bindkey "^[[B" down-line-or-beginning-search # Down arrow history search

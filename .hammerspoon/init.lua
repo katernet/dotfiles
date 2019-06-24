@@ -26,6 +26,32 @@ end
 sleepWatcher = hs.caffeinate.watcher.new(caffeinateWatcher)
 sleepWatcher:start()
 
+-- caffeine - Menu bar icon only displayed when caffeine is on
+caffeine = hs.menubar.new()
+function setCaffeineDisplay(state)
+	if state then
+		if caffeine:isInMenuBar() == false then -- true when object first loads
+			caffeine:returnToMenuBar()
+			caffeine:setIcon("caffeine.pdf")
+		else
+			caffeine:setIcon("caffeine.pdf")
+		end
+	else
+		if caffeine:isInMenuBar() == true then
+			caffeine:removeFromMenuBar()
+		end
+	end
+end
+function caffeineClicked()
+	setCaffeineDisplay(hs.caffeinate.toggle("displayIdle"))
+end
+if caffeine then
+	caffeine:setClickCallback(caffeineClicked)
+	setCaffeineDisplay(hs.caffeinate.get("displayIdle"))
+end
+hs.hotkey.bind(mash, "C", function() caffeineClicked()
+end)
+
 -- Open apps
 function openSafari()
 	application.launchOrFocus("Safari")

@@ -18,11 +18,6 @@ source "$ZSH"/.zsh_options
 # Plugins #
 plugins=(git thefuck zsh-autosuggestions zsh-syntax-highlighting z)
 
-# Source plugins
-for p ($plugins); do
-	source "$ZSH"/plugins/$p/$p.plugin.zsh
-done
-
 # Custom syntax highlighting #
 ZSH_HIGHLIGHT_STYLES[globbing]=fg=99 # SlateBlue1
 ZSH_HIGHLIGHT_STYLES[history-expansion]=fg=99

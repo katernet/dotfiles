@@ -1,3 +1,8 @@
+# Source plugins
+for p ($plugins); do
+        source "$ZSH"/plugins/$p/$p.plugin.zsh
+done
+
 # Find file containing string
 findstr() {
 	if [[ $# == 1 ]]; then

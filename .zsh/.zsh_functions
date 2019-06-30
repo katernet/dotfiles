@@ -1,14 +1,17 @@
+# Greeting
+[[ $UID = 501 && ! -z $TTY ]] && uname -mnprs && uptime # For user account and interactive session only
+
 # Source plugins
 for p ($plugins); do
-        source "$ZSH"/plugins/$p/$p.plugin.zsh
+	[ -e "$ZSH"/plugins/$p/$p.plugin.zsh ] && source "$ZSH"/plugins/$p/$p.plugin.zsh
 done
 
 # Find file containing string
 findstr() {
 	if [[ $# == 1 ]]; then
-		find . -type f -exec grep "$1" /dev/null {} \; # Current directory
+		find . -type f -exec grep --exclude={.zcompdump,.zsh_history} "$1" /dev/null {} \; # Current directory
 	elif [[ $# == 2 ]]; then
-		find "$1" -type f -exec grep "$2" /dev/null {} \; # Directory specified in 1st arg
+		find "$1" -type f -exec grep --exclude={.zcompdump,.zsh_history} "$2" /dev/null {} \; # Directory specified in 1st arg
 	fi
 }
 
@@ -20,7 +23,8 @@ bu() {
 		echo -n "" > "$ZSH"/.zbulog # Clear backup file log
 		echo "Cleared backup log file."
 	else
-		cp -ip "$1" "$1".bak_"$(date +%Y%m%d%H%M)" # Backup file with date in filename
+		mv "$1" "$1".bak_"$(date +%Y%m%d%H%M)" # Backup file with date in filename
+		cp -ip "$1".bak_"$(date +%Y%m%d%H%M)" "$1" # Copy backup and use original filename
 		if [[ $# == 2 ]] && [[ $2 == log ]]; then
 			echo "$(date "+%Y-%m-%d %T") bu: $PWD/$1" >> "$ZSH"/.zbulog
 		fi
@@ -29,7 +33,18 @@ bu() {
 
 # Git add file 1st arg, commit message 2nd arg and push.
 gacp() {
-	git add "$1"
-	git commit -m "$2"
+	git add $1
+	git commit -m $2
 	git push
+}
+
+# Outputs name of current git branch
+function git_current_branch() {
+	local ref
+	ref=$(git symbolic-ref HEAD 2>/dev/null)
+	if [[ $? != 0 ]]; then
+		[[ $? == 128 ]] && return 0 # No git repo
+		ref=$(git rev-parse --short HEAD 2> /dev/null) || return
+	fi
+	echo ${ref#refs/heads/}
 }

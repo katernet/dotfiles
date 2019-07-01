@@ -5,7 +5,7 @@ My dotfiles 🤘🏼
 Feel free to use them as needed.
 
 <p align="center">
-  <img src="https://i.imgur.com/xCXvLpp.png"/>
+  <img src="https://images2.imgbox.com/42/ef/V7kqS7w8_o.gif"/>
 </p>
 
 ### 🖥 zsh

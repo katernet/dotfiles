@@ -33,12 +33,10 @@ SAVEHIST=10000
 
 # Keybinds
 bindkey '^[[3~' 	delete-char 			# [Del] - forward delete
-bindkey '\e[3~' 	kill-word 			# [Alt+Del] - delete word after cursor
 bindkey '^[[H' 		beginning-of-line 		# [Home] - beginning of line
 bindkey '^[[F' 		end-of-line 			# [End] - end of line
 bindkey '^[[A' 		up-line-or-beginning-search 	# [Up] - history search
 bindkey '^[[B'		down-line-or-beginning-search 	# [Down] - history search
-bindkey ' ' 		magic-space 			# [Space] - history expansion
 
 # Custom syntax highlighting
 ZSH_HIGHLIGHT_STYLES[globbing]=fg=99 		# SlateBlue1

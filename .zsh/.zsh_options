@@ -1,10 +1,19 @@
 # Colors
-autoload -U colors
+autoload -Uz colors compinit
 colors
+
+# zcompdump
+zcompdumpd="$ZSH"/.zcompdump
+if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' $zcompdumpd) ]; then # Load zcompdump only once per day
+	compinit -d $zcompdumpd
+else
+	compinit -C -d $zcompdumpd
+fi
 
 # Env vars
 export GPG_TTY=$(tty) 				# GPG signing
 export LSCOLORS="Gxfxcxdxbxegedabagacad" 	# ls colors
+export LS_COLORS="di=1;36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43" # GNU ls colors
 export RPROMPT_EXIT=1 				# Right prompt exit code
 export RPROMPT_CMDTIME=0 			# Right prompt command time
 
@@ -17,6 +26,7 @@ setopt pushdignoredups 		# Don’t push multiple copies of the same directory on
 setopt pushdminus 		# Exchanges meanings of + and - with a number specified directory in the stack
 setopt complete_in_word 	# Allow completion from within a word/phrase
 setopt extended_history		# Record timestamp of command in HISTFILE
+setopt globdots			# Dotfiles are matched without explicitly specifying the dot
 setopt hist_expire_dups_first 	# Delete duplicates first when HISTFILE size exceeds HISTSIZE
 setopt hist_ignore_dups 	# Ignore duplicated commands history list
 setopt hist_ignore_space 	# Ignore commands that start with space
@@ -37,11 +47,6 @@ bindkey '^[[H' 		beginning-of-line 		# [Home] - beginning of line
 bindkey '^[[F' 		end-of-line 			# [End] - end of line
 bindkey '^[[A' 		up-line-or-beginning-search 	# [Up] - history search
 bindkey '^[[B'		down-line-or-beginning-search 	# [Down] - history search
-
-# Custom syntax highlighting
-ZSH_HIGHLIGHT_STYLES[globbing]=fg=99 		# SlateBlue1
-ZSH_HIGHLIGHT_STYLES[history-expansion]=fg=99
-zle_highlight+=(paste:none) 			# Disable paste highlighting
 
 # z files
 _Z_DATA="$ZSH"/.z

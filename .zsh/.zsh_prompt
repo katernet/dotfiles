@@ -76,3 +76,8 @@ function git_prompt_info() {
 	ref=$(git symbolic-ref HEAD 2>/dev/null) || return 0
         echo "$GIT_PROMPT_PREFIX${ref#refs/heads/} $(git_status)$GIT_PROMPT_SUFFIX"
 }
+
+# Custom syntax highlighting
+ZSH_HIGHLIGHT_STYLES[globbing]=fg=99 		# SlateBlue1
+ZSH_HIGHLIGHT_STYLES[history-expansion]=fg=99
+zle_highlight+=(paste:none) 			# Disable paste highlighting

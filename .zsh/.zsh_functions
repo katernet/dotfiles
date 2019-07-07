@@ -1,9 +1,13 @@
 # Greeting
 [[ $UID = 501 && ! -z $TTY ]] && uname -mnprs && uptime # For user account and interactive session only
 
-# Source plugins
+# Load plugins with zplugin
+source "$ZSH"/.zplugin/zplugin.zsh
 for p ($plugins); do
-	[ -e "$ZSH"/plugins/$p/$p.plugin.zsh ] && source "$ZSH"/plugins/$p/$p.plugin.zsh
+	if [ -e "$ZSH"/plugins/$p/$p.plugin.zsh ]; then
+		zplugin ice wait'0' ${${(M)p:#*syntax-high*}:+atinit'zpcompinit; zpcdreplay'} lucid
+		zplugin light "$ZSH"/plugins/$p
+	fi
 done
 
 # Find file containing string

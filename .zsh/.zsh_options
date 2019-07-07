@@ -1,8 +1,6 @@
-# Colors
-autoload -Uz colors compinit
-colors
+autoload -Uz compinit
 
-# zcompdump
+# compinit
 zcompdumpd="$ZSH"/.zcompdump
 if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' $zcompdumpd) ]; then # Load zcompdump only once per day
 	compinit -d $zcompdumpd
@@ -47,6 +45,15 @@ bindkey '^[[H' 		beginning-of-line 		# [Home] - beginning of line
 bindkey '^[[F' 		end-of-line 			# [End] - end of line
 bindkey '^[[A' 		up-line-or-beginning-search 	# [Up] - history search
 bindkey '^[[B'		down-line-or-beginning-search 	# [Down] - history search
+
+# zplugin
+declare -A ZPLGM  # Initialize Zplugin's hash definition
+ZPLGM[HOME_DIR]="$ZSH"/.zplugin
+ZPLGM[PLUGINS_DIR]="$ZSH"/.zplugin/plugins
+ZPLGM[COMPLETIONS_DIR]="$ZSH"/.zplugin/completions
+ZPLGM[SNIPPETS_DIR]="$ZSH"/.zplugin/snippets
+ZPLGM[ZCOMPDUMP_PATH]="$ZSH"/.zcompdump
+ZPLGM[COMPINIT_OPTS]=-C
 
 # z files
 _Z_DATA="$ZSH"/.z

@@ -80,4 +80,3 @@ function git_prompt_info() {
 # Custom syntax highlighting
 ZSH_HIGHLIGHT_STYLES[globbing]=fg=99 		# SlateBlue1
 ZSH_HIGHLIGHT_STYLES[history-expansion]=fg=99
-zle_highlight+=(paste:none) 			# Disable paste highlighting

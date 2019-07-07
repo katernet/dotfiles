@@ -12,8 +12,6 @@ Feel free to use them as needed.
 
 Using zsh from Homebrew with a custom .zshrc, which includes theme support with git status in prompt and plugin support.
 
-TODO: autoload oh-my-zsh plugins instead of sourcing. If this is possible, please let me know by opening an issue.
-
 ### 🍺 Brew
 My [Homebrew](https://github.com/Homebrew/brew) packages and casks.
 

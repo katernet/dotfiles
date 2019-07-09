@@ -1,5 +1,8 @@
 autoload -U colors && colors
 
+# Greeting
+[[ $UID = 501 && ! -z $TTY ]] && uname -mnprs && uptime # For user account and interactive session only
+
 # Prompt
 PS1='%n@%m %F{green}%(5~|%-1~/…/%2~|%4~)%f $(git_prompt_info)%(?.%#.%{$fg_bold[red]%}%#%{$reset_color%}) '
 
@@ -54,7 +57,7 @@ GIT_PROMPT_ADDED="%{$fg[yellow]%}✚"
 GIT_PROMPT_UNMERGED="%{$fg[white]%}§"
 
 # Checks status of working tree
-function git_status() {
+git_status() {
 	local STATUS=$(git status --porcelain 2>/dev/null)
 	if $(echo "$STATUS" | grep '^A ' &> /dev/null); then
 		echo "$GIT_PROMPT_ADDED"
@@ -72,14 +75,9 @@ function git_status() {
 }
 
 # Output git branch info into prompt
-function git_prompt_info() {
+git_prompt_info() {
 	[[ $UID = 0 ]] && return 0 # No git prompt for root user
 	local ref
 	ref=$(git symbolic-ref HEAD 2>/dev/null) || return 0
 	echo "$GIT_PROMPT_PREFIX${ref#refs/heads/} $(git_status)$GIT_PROMPT_SUFFIX"
 }
-
-# Custom syntax highlighting
-typeset -gA ZSH_HIGHLIGHT_STYLES
-ZSH_HIGHLIGHT_STYLES[globbing]=fg=99 		# SlateBlue1
-ZSH_HIGHLIGHT_STYLES[history-expansion]=fg=99

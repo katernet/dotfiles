@@ -15,23 +15,16 @@ alias 7='cd -7'
 alias 8='cd -8'
 alias 9='cd -9'
 alias l='ls -lahG'
-alias ll='ls -lhG'
+alias ld='ls -lhG'
 alias l@='ls -la@G'
-alias lR='ls -lR'
-alias lt='ls -lt'
-alias lu='ls -lu'
-function d () {
-  if [[ -n $1 ]]; then
-    dirs "$@"
-  else
-    dirs -v | head -10
-  fi
-}
-compdef _dirs d
+alias lR='ls -laRG'
+alias lt='ls -latG'
+alias lu='ls -lautG'
+alias tree="find . -print | sed -e 's;[^/]*/;|__;g;s;__|; |;g'"
 
 # Cmds
-alias md='mkdir -p'
-alias rd=rmdir
+alias md='mkdir'
+alias rd='rm -R'
 alias zshrc='mate ~/.zshrc'
 alias szshrc='source ~/.zshrc'
 alias suroot='sudo -E -s'
@@ -40,11 +33,13 @@ alias -g G='| grep -i'
 alias gs='git status'
 alias gpom='git push origin master'
 alias gpob='git push origin $(current_branch)'
+alias gcu='git reset HEAD^ && git push -f' # Undo last commit
 alias exitcode='echo ${1:-$(print -P %?)}'
 
 # Mac
 alias doff='pmset displaysleepnow; echo Display has been turned off!'
 alias lock='/System/Library/CoreServices/Menu\ Extras/user.menu/Contents/Resources/CGSession -suspend'
+alias pmsg='pmset -g'
 alias pmsa='pmset -g assertions'
 alias flushdns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder'
 alias ports='lsof -i -P'

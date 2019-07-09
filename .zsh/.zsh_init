@@ -1,13 +1,3 @@
-autoload -Uz compinit
-
-# compinit
-zcompdumpd="$ZSH"/.zcompdump
-if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' $zcompdumpd) ]; then # Load zcompdump only once per day
-	compinit -d $zcompdumpd
-else
-	compinit -C -d $zcompdumpd
-fi
-
 # Env vars
 export GPG_TTY=$(tty) 				# GPG signing
 export LSCOLORS="Gxfxcxdxbxegedabagacad" 	# ls colors
@@ -34,11 +24,6 @@ unsetopt flowcontrol 		# Output flow control via start/stop characters is disabl
 unsetopt histverify 		# Disable confirmation in expansion
 unsetopt menu_complete 		# Do not autoselect the first completion entry
 
-# History
-HISTFILE="$ZSH"/.zsh_history
-HISTSIZE=50000
-SAVEHIST=10000
-
 # Keybinds
 bindkey '^[[3~' 	delete-char 			# [Del] - forward delete
 bindkey '^[[H' 		beginning-of-line 		# [Home] - beginning of line
@@ -46,14 +31,49 @@ bindkey '^[[F' 		end-of-line 			# [End] - end of line
 bindkey '^[[A' 		up-line-or-beginning-search 	# [Up] - history search
 bindkey '^[[B'		down-line-or-beginning-search 	# [Down] - history search
 
-# zplugin
-declare -A ZPLGM  # Initialize Zplugin's hash definition
-ZPLGM[HOME_DIR]="$ZSH"/.zplugin
-ZPLGM[PLUGINS_DIR]="$ZSH"/.zplugin/plugins
-ZPLGM[COMPLETIONS_DIR]="$ZSH"/.zplugin/completions
-ZPLGM[SNIPPETS_DIR]="$ZSH"/.zplugin/snippets
-ZPLGM[ZCOMPDUMP_PATH]="$ZSH"/.zcompdump
-ZPLGM[COMPINIT_OPTS]=-C
+# History
+HISTFILE="$ZSH"/.zsh_hist
+HISTSIZE=50000
+SAVEHIST=10000
 
 # z files
 _Z_DATA="$ZSH"/.z
+
+# zplugin
+declare -A ZPLGM  # Initialize zplugin's hash definition
+ZPLGM[HOME_DIR]="$ZSH"/zplugin
+ZPLGM[PLUGINS_DIR]="$ZSH"/zplugin/plugins
+ZPLGM[COMPLETIONS_DIR]="$ZSH"/zplugin/completions
+ZPLGM[SNIPPETS_DIR]="$ZSH"/zplugin/snippets
+
+# compinit
+# Load only once per day and compile dump for fast load https://gist.github.com/ctechols/ca1035271ad134841284
+custom_compinit() {
+	autoload -Uz compinit
+	setopt extendedglob
+	local zcd="$ZSH"/.zcompdump
+	local zcdc="$zcd.zwc"
+	if [[ -f "$zcd"(#qN.m1) ]]; then # Requires extendedglob opt
+		compinit -d "$zcd" # -d: Custom dump path
+		{ zcompile "$zcd" } &| # Compile dump in background job
+	else
+		compinit -C -d "$zcd" # -C: Ignore checking
+		{ [[ ! -f "$zcdc" || "$zcd" -nt "$zcdc" ]] && zcompile "$zcd" } &| # If no compiled dump or dump newer than compiled dump
+	fi
+	unsetopt extendedglob
+}
+
+# Load plugins with zplugin
+source "$ZSH"/zplugin/zplugin.zsh
+#(( ${+_comps} )) && _comps[zplugin]=_zplugin # Required for sourcing after loading compinit
+for p ($plugins); do
+	if [ -e "$ZSH"/plugins/$p/$p.plugin.zsh ]; then
+		zplugin ice lucid wait'0' ${${(M)p:#*syntax*}:+atinit'custom_compinit; zpcdreplay'} # Call compinit with custom_compinit() instead of zpcompinit
+		zplugin light "$ZSH"/plugins/$p
+	fi
+done
+
+# Custom syntax highlighting
+typeset -gA ZSH_HIGHLIGHT_STYLES # Prevent assignment to invalid subscript range
+ZSH_HIGHLIGHT_STYLES[globbing]=fg=99 		# SlateBlue1
+ZSH_HIGHLIGHT_STYLES[history-expansion]=fg=99

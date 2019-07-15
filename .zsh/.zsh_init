@@ -53,6 +53,10 @@ custom_compinit() {
 	setopt extendedglob
 	local zcd="$ZSH"/.zcompdump
 	local zcdc="$zcd.zwc"
+	if [[ $UID = 0 || -n $SUDO_USER ]]; then # Root user
+		compinit -i -d "$zcd"_$USER # Dump for root user. -i: Ignore insecure files
+		return
+	fi
 	if [[ -f "$zcd"(#qN.m1) ]]; then # Requires extendedglob opt
 		compinit -d "$zcd" # -d: Custom dump path
 		{ zcompile "$zcd" } &| # Compile dump in background job

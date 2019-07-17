@@ -60,7 +60,7 @@ custom_compinit() {
 		compinit -i -d "$zcd"_$USER # Dump for root user. -i: Ignore insecure files
 		return
 	fi
-	if [[ -f "$zcd"(#qN.m1) ]]; then # Requires extendedglob opt
+	if [[ -f "$zcd"(#qN.m+1) ]]; then # Requires extendedglob opt
 		compinit -d "$zcd" # -d: Custom dump path
 		{ zcompile "$zcd" } &| # Compile dump in background job
 	else
@@ -72,7 +72,6 @@ custom_compinit() {
 
 # Load plugins with zplugin
 source "$ZSH"/zplugin/zplugin.zsh
-#(( ${+_comps} )) && _comps[zplugin]=_zplugin # Required for sourcing after loading compinit
 for p ($plugins); do
 	if [ -e "$ZSH"/plugins/$p/$p.plugin.zsh ]; then
 		zplugin ice lucid wait'0' ${${(M)p:#*syntax*}:+atinit'custom_compinit; zpcdreplay'} # Call compinit with custom_compinit() instead of zpcompinit

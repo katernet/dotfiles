@@ -36,9 +36,6 @@ HISTFILE="$ZSH"/.zsh_hist
 HISTSIZE=50000
 SAVEHIST=10000
 
-# zsh-autosuggestions
-ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(bracketed-paste) # Clear suggestions on paste
-
 # z files
 _Z_DATA="$ZSH"/.z
 

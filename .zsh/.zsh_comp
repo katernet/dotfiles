@@ -47,11 +47,12 @@ zle -N bracketed-paste bracketed-paste-magic
 
 # This speeds up pasting w/ autosuggest # https://github.com/zsh-users/zsh-autosuggestions/issues/238
 pasteinit() {
-  OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}
-  zle -N self-insert url-quote-magic
+	OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}
+	zle -N self-insert url-quote-magic
+	ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(bracketed-paste) # Clear suggestions on paste
 }
 pastefinish() {
-  zle -N self-insert $OLD_SELF_INSERT
+	zle -N self-insert $OLD_SELF_INSERT
 }
 zstyle :bracketed-paste-magic paste-init pasteinit
 zstyle :bracketed-paste-magic paste-finish pastefinish

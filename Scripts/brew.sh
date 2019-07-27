@@ -8,15 +8,15 @@ fi
 
 case "$1" in
 backup)
-	/usr/local/bin/brew leaves > $DIR/brews # Backup brew dependencies packages
-	/usr/local/bin/brew cask list > $DIR/casks # Backup brew casks
+	/usr/local/bin/brew leaves > $DIR/brews 	# Backup brew dependencies packages
+	/usr/local/bin/brew cask list > $DIR/casks 	# Backup brew casks
 	;;
 	
 update)
-	brew update 		# Update formulae
-	brew upgrade 		# Upgrade everthing
-	brew cask upgrade 	# Upgrade casks
-	brew cleanup -s 	# Clean old versions and cache
+	/usr/local/bin/brew update 		# Update formulae
+	/usr/local/bin/brew upgrade 		# Upgrade everthing
+	/usr/local/bin/brew cask upgrade 	# Upgrade casks
+	/usr/local/bin/brew cleanup -s		# Clean old versions and cache
 	;;
 
 restore)
@@ -36,7 +36,7 @@ restore)
 		printf "\nInstalling casks...\n"
 		brew tap homebrew/cask-fonts # Tap into font caskroom
 		for i in $(cat $DIR/casks); do
-			if ! sudo -u rich brew cask list --versions $i; then
+			if ! /usr/local/bin/brew cask list --versions $i; then
 				/usr/local/bin/brew cask install $i # Install cask
 			fi
 		done
@@ -44,7 +44,7 @@ restore)
 	}
 
 	# Check for Homebrew, install if we don't have it.
-	if test ! $(which brew); then
+	if test ! $(which /usr/local/bin/brew); then
 		read -p "Homebrew is not installed. Install? [y/n] " prompt
 		if [[ $prompt =~ [yY](es)* ]]; then
 			printf "\nInstalling Homebrew...\n"
@@ -57,7 +57,7 @@ restore)
 	else
 		installBrews
 		installCasks
-		usr/local/bin/brew cleanup -s # Cleanup old versions of installed formulae and scrub cache
+		/usr/local/bin/brew cleanup -s # Cleanup old versions of installed formulae and scrub cache
 	fi
 	;;
 esac

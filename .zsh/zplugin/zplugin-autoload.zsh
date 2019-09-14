@@ -10,7 +10,7 @@ ZPLGM[EXTENDED_GLOB]=""
 #
 
 # FUNCTION: -zplg-diff-functions-compute {{{
-# Computes ZPLG_FUNCTIONS that holds new functions added by plugin.
+# Computes FUNCTIONS that holds new functions added by plugin.
 # Uses data gathered earlier by -zplg-diff-functions().
 #
 # $1 - user/plugin
@@ -21,32 +21,32 @@ ZPLGM[EXTENDED_GLOB]=""
     # Following is paranoid for *_BEFORE and *_AFTER being only spaces
 
     builtin setopt localoptions extendedglob nokshglob noksharrays
-    [[ "${ZPLG_FUNCTIONS_BEFORE[$uspl2]}" != *[$'! \t']* || "${ZPLG_FUNCTIONS_AFTER[$uspl2]}" != *[$'! \t']* ]] && return 1
+    [[ "${ZPLGM[FUNCTIONS_BEFORE__$uspl2]}" != *[$'! \t']* || "${ZPLGM[FUNCTIONS_AFTER__$uspl2]}" != *[$'! \t']* ]] && return 1
 
     typeset -A func
     local i
 
     # This includes new functions. Quoting is kept (i.e. no i=${(Q)i})
-    for i in "${(z)ZPLG_FUNCTIONS_AFTER[$uspl2]}"; do
+    for i in "${(z)ZPLGM[FUNCTIONS_AFTER__$uspl2]}"; do
         func[$i]=1
     done
 
     # Remove duplicated entries, i.e. existing before. Quoting is kept
-    for i in "${(z)ZPLG_FUNCTIONS_BEFORE[$uspl2]}"; do
+    for i in "${(z)ZPLGM[FUNCTIONS_BEFORE__$uspl2]}"; do
         # if would do unset, then: func[opp+a\[]: invalid parameter name
         func[$i]=0
     done
 
     # Store the functions, associating them with plugin ($uspl2)
-    ZPLG_FUNCTIONS[$uspl2]=""
+    ZPLGM[FUNCTIONS__$uspl2]=""
     for i in "${(onk)func[@]}"; do
-        [[ "${func[$i]}" = "1" ]] && ZPLG_FUNCTIONS[$uspl2]+="$i "
+        [[ "${func[$i]}" = "1" ]] && ZPLGM[FUNCTIONS__$uspl2]+="$i "
     done
 
     return 0
 } # }}}
 # FUNCTION: -zplg-diff-options-compute {{{
-# Computes ZPLG_OPTIONS that holds options changed by plugin.
+# Computes OPTIONS that holds options changed by plugin.
 # Uses data gathered earlier by -zplg-diff-options().
 #
 # $1 - user/plugin
@@ -56,11 +56,11 @@ ZPLGM[EXTENDED_GLOB]=""
     # Cannot run diff if *_BEFORE or *_AFTER variable is not set
     # Following is paranoid for *_BEFORE and *_AFTER being only spaces
     builtin setopt localoptions extendedglob nokshglob noksharrays
-    [[ "${ZPLG_OPTIONS_BEFORE[$uspl2]}" != *[$'! \t']* || "${ZPLG_OPTIONS_AFTER[$uspl2]}" != *[$'! \t']* ]] && return 1
+    [[ "${ZPLGM[OPTIONS_BEFORE__$uspl2]}" != *[$'! \t']* || "${ZPLGM[OPTIONS_AFTER__$uspl2]}" != *[$'! \t']* ]] && return 1
 
     typeset -A opts_before opts_after opts
-    opts_before=( "${(z)ZPLG_OPTIONS_BEFORE[$uspl2]}" )
-    opts_after=( "${(z)ZPLG_OPTIONS_AFTER[$uspl2]}" )
+    opts_before=( "${(z)ZPLGM[OPTIONS_BEFORE__$uspl2]}" )
+    opts_after=( "${(z)ZPLGM[OPTIONS_AFTER__$uspl2]}" )
     opts=( )
 
     # Iterate through first array (keys the same
@@ -74,7 +74,7 @@ ZPLGM[EXTENDED_GLOB]=""
 
     # Serialize for reporting
     local IFS=" "
-    ZPLG_OPTIONS[$uspl2]="${(kv)opts[@]}"
+    ZPLGM[OPTIONS__$uspl2]="${(kv)opts[@]}"
     return 0
 } # }}}
 # FUNCTION: -zplg-diff-env-compute {{{
@@ -89,8 +89,8 @@ ZPLGM[EXTENDED_GLOB]=""
     # Cannot run diff if *_BEFORE or *_AFTER variable is not set
     # Following is paranoid for *_BEFORE and *_AFTER being only spaces
     builtin setopt localoptions extendedglob nokshglob noksharrays
-    [[ "${ZPLG_PATH_BEFORE[$uspl2]}" != *[$'! \t']* || "${ZPLG_PATH_AFTER[$uspl2]}" != *[$'! \t']* ]] && return 1
-    [[ "${ZPLG_FPATH_BEFORE[$uspl2]}" != *[$'! \t']* || "${ZPLG_FPATH_AFTER[$uspl2]}" != *[$'! \t']* ]] && return 1
+    [[ "${ZPLGM[PATH_BEFORE__$uspl2]}" != *[$'! \t']* || "${ZPLGM[PATH_AFTER__$uspl2]}" != *[$'! \t']* ]] && return 1
+    [[ "${ZPLGM[FPATH_BEFORE__$uspl2]}" != *[$'! \t']* || "${ZPLGM[FPATH_AFTER__$uspl2]}" != *[$'! \t']* ]] && return 1
 
     typeset -A path_state fpath_state
     local i
@@ -100,19 +100,19 @@ ZPLGM[EXTENDED_GLOB]=""
     #
 
     # This includes new path elements
-    for i in "${(z)ZPLG_PATH_AFTER[$uspl2]}"; do
+    for i in "${(z)ZPLGM[PATH_AFTER__$uspl2]}"; do
         path_state[$i]=1
     done
 
     # Remove duplicated entries, i.e. existing before
-    for i in "${(z)ZPLG_PATH_BEFORE[$uspl2]}"; do
+    for i in "${(z)ZPLGM[PATH_BEFORE__$uspl2]}"; do
         unset "path_state[$i]"
     done
 
     # Store the path elements, associating them with plugin ($uspl2)
-    ZPLG_PATH[$uspl2]=""
+    ZPLGM[PATH__$uspl2]=""
     for i in "${(onk)path_state[@]}"; do
-        ZPLG_PATH[$uspl2]+="$i "
+        ZPLGM[PATH__$uspl2]+="$i "
     done
 
     #
@@ -120,19 +120,19 @@ ZPLGM[EXTENDED_GLOB]=""
     #
 
     # This includes new path elements
-    for i in "${(z)ZPLG_FPATH_AFTER[$uspl2]}"; do
+    for i in "${(z)ZPLGM[FPATH_AFTER__$uspl2]}"; do
         fpath_state[$i]=1
     done
 
     # Remove duplicated entries, i.e. existing before
-    for i in "${(z)ZPLG_FPATH_BEFORE[$uspl2]}"; do
+    for i in "${(z)ZPLGM[FPATH_BEFORE__$uspl2]}"; do
         unset "fpath_state[$i]"
     done
 
     # Store the path elements, associating them with plugin ($uspl2)
-    ZPLG_FPATH[$uspl2]=""
+    ZPLGM[FPATH__$uspl2]=""
     for i in "${(onk)fpath_state[@]}"; do
-        ZPLG_FPATH[$uspl2]+="$i "
+        ZPLGM[FPATH__$uspl2]+="$i "
     done
 
     return 0
@@ -150,12 +150,12 @@ ZPLGM[EXTENDED_GLOB]=""
     # Cannot run diff if *_BEFORE or *_AFTER variable is not set
     # Following is paranoid for *_BEFORE and *_AFTER being only spaces
     builtin setopt localoptions extendedglob nokshglob noksharrays
-    [[ "${ZPLG_PARAMETERS_BEFORE[$uspl2]}" != *[$'! \t']* || "${ZPLG_PARAMETERS_AFTER[$uspl2]}" != *[$'! \t']* ]] && return 1
+    [[ "${ZPLGM[PARAMETERS_BEFORE__$uspl2]}" != *[$'! \t']* || "${ZPLGM[PARAMETERS_AFTER__$uspl2]}" != *[$'! \t']* ]] && return 1
 
     # Un-concatenated parameters from moment of diff start and of diff end
     typeset -A params_before params_after
-    params_before=( "${(z)ZPLG_PARAMETERS_BEFORE[$uspl2]}" )
-    params_after=( "${(z)ZPLG_PARAMETERS_AFTER[$uspl2]}" )
+    params_before=( "${(z)ZPLGM[PARAMETERS_BEFORE__$uspl2]}" )
+    params_after=( "${(z)ZPLGM[PARAMETERS_AFTER__$uspl2]}" )
 
     # The parameters that changed, with save of what
     # parameter was when diff started or when diff ended
@@ -186,8 +186,8 @@ ZPLGM[EXTENDED_GLOB]=""
     done
 
     # Serialize for reporting
-    ZPLG_PARAMETERS_PRE[$uspl2]="${(j: :)${(qkv)params_pre[@]}}"
-    ZPLG_PARAMETERS_POST[$uspl2]="${(j: :)${(qkv)params_post[@]}}"
+    ZPLGM[PARAMETERS_PRE__$uspl2]="${(j: :)${(qkv)params_pre[@]}}"
+    ZPLGM[PARAMETERS_POST__$uspl2]="${(j: :)${(qkv)params_post[@]}}"
 
     return 0
 } # }}}
@@ -234,35 +234,35 @@ ZPLGM[EXTENDED_GLOB]=""
 
     # Shadowing
     ZPLG_REPORTS[$REPLY]=""
-    ZPLG_BINDKEYS[$REPLY]=""
-    ZPLG_ZSTYLES[$REPLY]=""
-    ZPLG_ALIASES[$REPLY]=""
-    ZPLG_WIDGETS_SAVED[$REPLY]=""
-    ZPLG_WIDGETS_DELETE[$REPLY]=""
+    ZPLGM[BINDKEYS__$REPLY]=""
+    ZPLGM[ZSTYLES__$REPLY]=""
+    ZPLGM[ALIASES__$REPLY]=""
+    ZPLGM[WIDGETS_SAVED__$REPLY]=""
+    ZPLGM[WIDGETS_DELETE__$REPLY]=""
 
     # Function diffing
-    ZPLG_FUNCTIONS[$REPLY]=""
-    ZPLG_FUNCTIONS_BEFORE[$REPLY]=""
-    ZPLG_FUNCTIONS_AFTER[$REPLY]=""
+    ZPLGM[FUNCTIONS__$REPLY]=""
+    ZPLGM[FUNCTIONS_BEFORE__$REPLY]=""
+    ZPLGM[FUNCTIONS_AFTER__$REPLY]=""
 
     # Option diffing
-    ZPLG_OPTIONS[$REPLY]=""
-    ZPLG_OPTIONS_BEFORE[$REPLY]=""
-    ZPLG_OPTIONS_AFTER[$REPLY]=""
+    ZPLGM[OPTIONS__$REPLY]=""
+    ZPLGM[OPTIONS_BEFORE__$REPLY]=""
+    ZPLGM[OPTIONS_AFTER__$REPLY]=""
 
     # Environment diffing
-    ZPLG_PATH[$REPLY]=""
-    ZPLG_PATH_BEFORE[$REPLY]=""
-    ZPLG_PATH_AFTER[$REPLY]=""
-    ZPLG_FPATH[$REPLY]=""
-    ZPLG_FPATH_BEFORE[$REPLY]=""
-    ZPLG_FPATH_AFTER[$REPLY]=""
+    ZPLGM[PATH__$REPLY]=""
+    ZPLGM[PATH_BEFORE__$REPLY]=""
+    ZPLGM[PATH_AFTER__$REPLY]=""
+    ZPLGM[FPATH__$REPLY]=""
+    ZPLGM[FPATH_BEFORE__$REPLY]=""
+    ZPLGM[FPATH_AFTER__$REPLY]=""
 
     # Parameter diffing
-    ZPLG_PARAMETERS_PRE[$REPLY]=""
-    ZPLG_PARAMETERS_POST[$REPLY]=""
-    ZPLG_PARAMETERS_BEFORE[$REPLY]=""
-    ZPLG_PARAMETERS_AFTER[$REPLY]=""
+    ZPLGM[PARAMETERS_PRE__$REPLY]=""
+    ZPLGM[PARAMETERS_POST__$REPLY]=""
+    ZPLGM[PARAMETERS_BEFORE__$REPLY]=""
+    ZPLGM[PARAMETERS_AFTER__$REPLY]=""
 } # }}}
 # FUNCTION: -zplg-exists-message {{{
 # Checks if plugin is loaded. Testable. Also outputs error
@@ -298,7 +298,7 @@ ZPLGM[EXTENDED_GLOB]=""
     local uspl2="$1"
 
     typeset -a func
-    func=( "${(z)ZPLG_FUNCTIONS[$uspl2]}" )
+    func=( "${(z)ZPLGM[FUNCTIONS__$uspl2]}" )
 
     # Get length of longest left-right string pair,
     # and length of longest left string
@@ -354,12 +354,12 @@ ZPLGM[EXTENDED_GLOB]=""
     # Paranoid, don't want bad key/value pair error
     integer empty=0
     -zplg-save-set-extendedglob
-    [[ "${ZPLG_OPTIONS[$uspl2]}" != *[$'! \t']* ]] && empty=1
+    [[ "${ZPLGM[OPTIONS__$uspl2]}" != *[$'! \t']* ]] && empty=1
     -zplg-restore-extendedglob
     (( empty )) && return 0
 
     typeset -A opts
-    opts=( "${(z)ZPLG_OPTIONS[$uspl2]}" )
+    opts=( "${(z)ZPLGM[OPTIONS__$uspl2]}" )
 
     # Get length of longest option
     integer longest=0
@@ -387,10 +387,10 @@ ZPLGM[EXTENDED_GLOB]=""
     # Format PATH?
     if [[ "$which" = "1" ]]; then
         typeset -a elem
-        elem=( "${(z@)ZPLG_PATH[$uspl2]}" )
+        elem=( "${(z@)ZPLGM[PATH__$uspl2]}" )
     elif [[ "$which" = "2" ]]; then
         typeset -a elem
-        elem=( "${(z@)ZPLG_FPATH[$uspl2]}" )
+        elem=( "${(z@)ZPLGM[FPATH__$uspl2]}" )
     fi
 
     # Enumerate elements added
@@ -415,11 +415,11 @@ ZPLGM[EXTENDED_GLOB]=""
     # i.e. include white spaces as empty
     builtin setopt localoptions extendedglob nokshglob noksharrays
     REPLY=""
-    [[ "${ZPLG_PARAMETERS_PRE[$uspl2]}" != *[$'! \t']* || "${ZPLG_PARAMETERS_POST[$uspl2]}" != *[$'! \t']* ]] && return 0
+    [[ "${ZPLGM[PARAMETERS_PRE__$uspl2]}" != *[$'! \t']* || "${ZPLGM[PARAMETERS_POST__$uspl2]}" != *[$'! \t']* ]] && return 0
 
     typeset -A elem_pre elem_post
-    elem_pre=( "${(z)ZPLG_PARAMETERS_PRE[$uspl2]}" )
-    elem_post=( "${(z)ZPLG_PARAMETERS_POST[$uspl2]}" )
+    elem_pre=( "${(z)ZPLGM[PARAMETERS_PRE__$uspl2]}" )
+    elem_post=( "${(z)ZPLGM[PARAMETERS_POST__$uspl2]}" )
 
     # Find longest key and longest value
     integer longest=0 vlongest1=0 vlongest2=0
@@ -725,6 +725,7 @@ ZPLGM[EXTENDED_GLOB]=""
         command git pull --no-stat;
     )
     builtin print -- "Compiling Zplugin (zcompile)..."
+    command rm -f "${ZPLGM[BIN_DIR]}"/*.zwc(N)
     zcompile "${ZPLGM[BIN_DIR]}"/zplugin.zsh
     zcompile "${ZPLGM[BIN_DIR]}"/zplugin-side.zsh
     zcompile "${ZPLGM[BIN_DIR]}"/zplugin-install.zsh
@@ -760,6 +761,7 @@ ZPLGM[EXTENDED_GLOB]=""
     done
 } # }}}
 # FUNCTION: -zplg-unload {{{
+# 0. Call the Zsh Plugin's Standard *_plugin_unload function
 # 1. Unfunction functions (created by plugin)
 # 2. Delete bindkeys (...)
 # 3. Delete Zstyles
@@ -795,18 +797,24 @@ ZPLGM[EXTENDED_GLOB]=""
     LASTREPORT=`-zplg-show-report "$1" "$2"`
 
     #
+    # Call the Zsh Plugin's Standard *_plugin_unload function
+    #
+
+    (( ${+functions[${plugin}_plugin_unload]} )) && ${plugin}_plugin_unload
+
+    #
     # 1. Unfunction
     #
 
     -zplg-diff-functions-compute "$uspl2"
     typeset -a func
-    func=( "${(z)ZPLG_FUNCTIONS[$uspl2]}" )
+    func=( "${(z)ZPLGM[FUNCTIONS__$uspl2]}" )
     local f
     for f in "${(on)func[@]}"; do
         [[ -z "$f" ]] && continue
         f="${(Q)f}"
         (( quiet )) || print "Deleting function $f"
-        unfunction -- "$f"
+        (( ${+functions[$f]} )) && unfunction -- "$f"
         (( ${+precmd_functions} )) && precmd_functions=( ${precmd_functions[@]:#$f} )
         (( ${+preexec_functions} )) && preexec_functions=( ${preexec_functions[@]:#$f} )
         (( ${+chpwd_functions} )) && chpwd_functions=( ${chpwd_functions[@]:#$f} )
@@ -820,7 +828,7 @@ ZPLGM[EXTENDED_GLOB]=""
     #
 
     typeset -a string_widget
-    string_widget=( "${(z)ZPLG_BINDKEYS[$uspl2]}" )
+    string_widget=( "${(z)ZPLGM[BINDKEYS__$uspl2]}" )
     local sw
     for sw in "${(Oa)string_widget[@]}"; do
         [[ -z "$sw" ]] && continue
@@ -862,7 +870,7 @@ ZPLGM[EXTENDED_GLOB]=""
     #
 
     typeset -a pattern_style
-    pattern_style=( "${(z)ZPLG_ZSTYLES[$uspl2]}" )
+    pattern_style=( "${(z)ZPLGM[ZSTYLES__$uspl2]}" )
     local ps
     for ps in "${(Oa)pattern_style[@]}"; do
         [[ -z "$ps" ]] && continue
@@ -888,12 +896,12 @@ ZPLGM[EXTENDED_GLOB]=""
     -zplg-diff-options-compute "$uspl2"
     integer empty=0
     -zplg-save-set-extendedglob
-    [[ "${ZPLG_OPTIONS[$uspl2]}" != *[$'! \t']* ]] && empty=1
+    [[ "${ZPLGM[OPTIONS__$uspl2]}" != *[$'! \t']* ]] && empty=1
     -zplg-restore-extendedglob
 
     if (( empty != 1 )); then
         typeset -A opts
-        opts=( "${(z)ZPLG_OPTIONS[$uspl2]}" )
+        opts=( "${(z)ZPLGM[OPTIONS__$uspl2]}" )
         local k
         for k in "${(kon)opts[@]}"; do
             # Internal options
@@ -914,7 +922,7 @@ ZPLGM[EXTENDED_GLOB]=""
     #
 
     typeset -a aname_avalue
-    aname_avalue=( "${(z)ZPLG_ALIASES[$uspl2]}" )
+    aname_avalue=( "${(z)ZPLGM[ALIASES__$uspl2]}" )
     local nv
     for nv in "${(Oa)aname_avalue[@]}"; do
         [[ -z "$nv" ]] && continue
@@ -963,7 +971,7 @@ ZPLGM[EXTENDED_GLOB]=""
     #
 
     typeset -a delete_widgets
-    delete_widgets=( "${(z)ZPLG_WIDGETS_DELETE[$uspl2]}" )
+    delete_widgets=( "${(z)ZPLGM[WIDGETS_DELETE__$uspl2]}" )
     local wid
     for wid in "${(Oa)delete_widgets[@]}"; do
         [[ -z "$wid" ]] && continue
@@ -977,7 +985,7 @@ ZPLGM[EXTENDED_GLOB]=""
     done
 
     typeset -a restore_widgets
-    restore_widgets=( "${(z)ZPLG_WIDGETS_SAVED[$uspl2]}" )
+    restore_widgets=( "${(z)ZPLGM[WIDGETS_SAVED__$uspl2]}" )
     for wid in "${(Oa)restore_widgets[@]}"; do
         [[ -z "$wid" ]] && continue
         wid="${(Q)wid}"
@@ -1001,9 +1009,9 @@ ZPLGM[EXTENDED_GLOB]=""
     # Have to iterate over $path elements and
     # skip those that were added by the plugin
     typeset -a new elem p
-    elem=( "${(z)ZPLG_PATH[$uspl2]}" )
+    elem=( "${(z)ZPLGM[PATH__$uspl2]}" )
     for p in "${path[@]}"; do
-        [[ -z "${elem[(r)$p]}" ]] && new+=( "$p" ) || {
+        [[ -z "${elem[(r)$p]}" ]] && { new+=( "$p" ); } || {
             (( quiet )) || print "Removing PATH element ${ZPLGM[col-info]}$p${ZPLGM[col-rst]}"
             [[ -d "$p" ]] || (( quiet )) || print "${ZPLGM[col-error]}Warning:${ZPLGM[col-rst]} it didn't exist on disk"
         }
@@ -1011,10 +1019,10 @@ ZPLGM[EXTENDED_GLOB]=""
     path=( "${new[@]}" )
 
     # The same for $fpath
-    elem=( "${(z)ZPLG_FPATH[$uspl2]}" )
+    elem=( "${(z)ZPLGM[FPATH__$uspl2]}" )
     new=( )
     for p in "${fpath[@]}"; do
-        [[ -z "${elem[(r)$p]}" ]] && new+=( "$p" ) || {
+        [[ -z "${elem[(r)$p]}" ]] && { new+=( "$p" ); } || {
             (( quiet )) || print "Removing FPATH element ${ZPLGM[col-info]}$p${ZPLGM[col-rst]}"
             [[ -d "$p" ]] || (( quiet )) || print "${ZPLGM[col-error]}Warning:${ZPLGM[col-rst]} it didn't exist on disk"
         }
@@ -1030,13 +1038,13 @@ ZPLGM[EXTENDED_GLOB]=""
     -zplg-diff-parameter-compute "$uspl2"
     empty=0
     -zplg-save-set-extendedglob
-    [[ "${ZPLG_PARAMETERS_POST[$uspl2]}" != *[$'! \t']* ]] && empty=1
+    [[ "${ZPLGM[PARAMETERS_POST__$uspl2]}" != *[$'! \t']* ]] && empty=1
     -zplg-restore-extendedglob
 
     if (( empty != 1 )); then
         typeset -A elem_pre elem_post
-        elem_pre=( "${(z)ZPLG_PARAMETERS_PRE[$uspl2]}" )
-        elem_post=( "${(z)ZPLG_PARAMETERS_POST[$uspl2]}" )
+        elem_pre=( "${(z)ZPLGM[PARAMETERS_PRE__$uspl2]}" )
+        elem_post=( "${(z)ZPLGM[PARAMETERS_POST__$uspl2]}" )
 
         # Find variables created or modified
         local wl found
@@ -1096,7 +1104,7 @@ ZPLGM[EXTENDED_GLOB]=""
     else
         (( quiet )) || print "Unregistering plugin $uspl2col"
         -zplg-unregister-plugin "$user" "$plugin"
-        LOADED_PLUGINS[${LOADED_PLUGINS[(i)$user${${user:#(%|/)*}:+/}$plugin]}]=()  # Support Zsh plugin standard
+        zsh_loaded_plugins[${zsh_loaded_plugins[(i)$user${${user:#(%|/)*}:+/}$plugin]}]=()  # Support Zsh plugin standard
         -zplg-clear-report-for "$user" "$plugin"
         (( quiet )) || print "Plugin's report saved to \$LASTREPORT"
     fi
@@ -1127,10 +1135,16 @@ ZPLGM[EXTENDED_GLOB]=""
     local msg="Plugin report for $user${${user:#(%|/)*}:+/}$plugin"
     print -- "${ZPLGM[col-bar]}${(r:${#msg}::-:)tmp__}${ZPLGM[col-rst]}"
 
+    local -A map
+    map=(
+        Error:  "${ZPLGM[col-error]}"
+        Warning:  "${ZPLGM[col-error]}"
+        Note:  "${ZPLGM[col-note]}"
+    )
     # Print report gathered via shadowing
     () {
         setopt localoptions extendedglob
-        print -rl -- "${(@)${(f@)ZPLG_REPORTS[$uspl2]}/(#b)(#s)([^[:space:]]##)([[:space:]]##)/${${${(M)match[1]:#(Warning:|Error:)}:+${ZPLGM[col-error]}${match[1]}${ZPLGM[col-rst]}}:-${ZPLGM[col-keyword]}${match[1]}${ZPLGM[col-rst]}}${match[2]}}"
+        print -rl -- "${(@)${(f@)ZPLG_REPORTS[$uspl2]}/(#b)(#s)([^[:space:]]##)([[:space:]]##)/${map[${match[1]}]:-${ZPLGM[col-keyword]}}${match[1]}${ZPLGM[col-rst]}${match[2]}}"
     }
 
     # Print report gathered via $functions-diffing
@@ -1272,35 +1286,33 @@ ZPLGM[EXTENDED_GLOB]=""
                     print -- "\rBinary release already up to date (version: $REPLY)"
 
                 (( ${+ice[run-atpull]} )) && {
-                    # Run z-plugins atpull hooks (the before atpull-ice ones)
-                    reply=( ${(on)ZPLG_EXTS[(I)z-plugin hook:\\\!atpull <->]} )
-                    for key in "${reply[@]}"; do
-                        arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
-                        "${arr[5]}" "plugin" "$user" "$plugin" "$id_as"
-                    done
+                    ZPLG_ICE=( "${(kv)ice[@]}" )
+                    [[ ${+ice[atpull]} = 1 && ${ice[atpull]} = "!"* ]] && {
+                        # Run z-plugins atpull hooks (the before atpull-ice ones)
+                        reply=( ${(on)ZPLG_EXTS[(I)z-plugin hook:\\\!atpull <->]} )
+                        for key in "${reply[@]}"; do
+                            arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
+                            "${arr[5]}" "plugin" "$user" "$plugin" "$id_as" "$local_dir"
+                        done
+                    }
 
-                    ( (( ${+ice[nocd]} == 0 )) && { () { setopt localoptions noautopushd; builtin cd -q "$local_dir/$dirname"; } && -zplg-at-eval "${ice[atpull]#!}" ${ice[atclone]}; ((1)); } || -zplg-at-eval "${ice[atpull]#!}" ${ice[atclone]}; )
-
-                    # Run z-plugins atpull hooks (the after atpull-ice ones)
-                    reply=( ${(on)ZPLG_EXTS[(I)z-plugin hook:atpull <->]} )
-                    for key in "${reply[@]}"; do
-                        arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
-                        "${arr[5]}" "plugin" "$user" "$plugin" "$id_as"
-                    done
+                    [[ ${+ice[atpull]} = 1 && ${ice[atpull]} = "!"* ]] && ( (( ${+ice[nocd]} == 0 )) && { builtin cd -q "$local_dir" && -zplg-at-eval "${ice[atpull]#\!}" ${ice[atclone]}; ((1)); } || -zplg-at-eval "${ice[atpull]#\!}" ${ice[atclone]}; )
+                    print -r -- "<mark>" >! "$local_dir/.zplugin_lstupd"
+                    ZPLG_ICE=()
                 }
             else
+                ZPLG_ICE=( "${(kv)ice[@]}" )
                 # Run z-plugins atpull hooks (the before atpull-ice ones)
                 [[ ${+ice[atpull]} = 1 && ${ice[atpull]} = "!"* ]] && {
                     reply=( ${(on)ZPLG_EXTS[(I)z-plugin hook:\\\!atpull <->]} )
                     for key in "${reply[@]}"; do
                         arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
-                        "${arr[5]}" "plugin" "$user" "$plugin" "$id_as"
+                        "${arr[5]}" "plugin" "$user" "$plugin" "$id_as" "$local_dir"
                     done
                 }
 
                 [[ ${+ice[atpull]} = 1 && ${ice[atpull]} = "!"* ]] && ( (( ${+ice[nocd]} == 0 )) && { builtin cd -q "$local_dir" && -zplg-at-eval "${ice[atpull]#\!}" ${ice[atclone]}; ((1)); } || -zplg-at-eval "${ice[atpull]#\!}" ${ice[atclone]}; )
                 print -r -- "<mark>" >! "$local_dir/.zplugin_lstupd"
-                ZPLG_ICE=( "${(kv)ice[@]}" )
                 [[ "${ICE_OPTS[opt_-q,--quiet]}" = 1 ]] && {
                     -zplg-any-colorify-as-uspl2 "$id_as"
                     print "\nUpdating plugin $REPLY"
@@ -1344,39 +1356,42 @@ ZPLGM[EXTENDED_GLOB]=""
               local -a log
               { log=( ${(@f)"$(<$local_dir/.zplugin_lstupd)"} ); } 2>/dev/null
               [[ ${#log} -gt 0 ]] && {
+                  ZPLG_ICE=( "${(kv)ice[@]}" )
                   # Run z-plugins atpull hooks (the before atpull-ice ones)
                   [[ ${+ice[atpull]} = 1 && ${ice[atpull]} = "!"* ]] && {
                       reply=( ${(on)ZPLG_EXTS[(I)z-plugin hook:\\\!atpull <->]} )
                       for key in "${reply[@]}"; do
                           arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
-                          "${arr[5]}" "plugin" "$user" "$plugin" "$id_as"
+                          "${arr[5]}" "plugin" "$user" "$plugin" "$id_as" "$local_dir"
                       done
                   }
                   [[ ${+ice[atpull]} = 1 && ${ice[atpull]} = "!"* ]] && ( (( ${+ice[nocd]} == 0 )) && { builtin cd -q "$local_dir" && -zplg-at-eval "${ice[atpull]#\!}" ${ice[atclone]}; ((1)); } || -zplg-at-eval "${ice[atpull]#\!}" ${ice[atclone]}; )
+                  ZPLG_ICE=()
                   command git pull --no-stat
                   ((1))
               } || {
                   (( ${+ice[run-atpull]} )) && {
+                      ZPLG_ICE=( "${(kv)ice[@]}" )
                       # Run z-plugins atpull hooks (the before atpull-ice ones)
-                      reply=( ${(on)ZPLG_EXTS[(I)z-plugin hook:\\\!atpull <->]} )
-                      for key in "${reply[@]}"; do
-                          arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
-                          "${arr[5]}" "plugin" "$user" "$plugin" "$id_as"
-                      done
-
-                      ( (( ${+ice[nocd]} == 0 )) && { () { setopt localoptions noautopushd; builtin cd -q "$local_dir/$dirname"; } && -zplg-at-eval "${ice[atpull]#!}" ${ice[atclone]}; ((1)); } || -zplg-at-eval "${ice[atpull]#!}" ${ice[atclone]}; )
-
-                      # Run z-plugins atpull hooks (the afteratpull-ice ones)
-                      reply=( ${(on)ZPLG_EXTS[(I)z-plugin hook:atpull <->]} )
-                      for key in "${reply[@]}"; do
-                          arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
-                          "${arr[5]}" "plugin" "$user" "$plugin" "$id_as"
-                      done
+                      [[ ${+ice[atpull]} = 1 && ${ice[atpull]} = "!"* ]] && {
+                          reply=( ${(on)ZPLG_EXTS[(I)z-plugin hook:\\\!atpull <->]} )
+                          for key in "${reply[@]}"; do
+                              arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
+                              "${arr[5]}" "plugin" "$user" "$plugin" "$id_as" "$local_dir"
+                          done
+                      }
+                      [[ ${+ice[atpull]} = 1 && ${ice[atpull]} = "!"* ]] && ( (( ${+ice[nocd]} == 0 )) && { builtin cd -q "$local_dir" && -zplg-at-eval "${ice[atpull]#\!}" ${ice[atclone]}; ((1)); } || -zplg-at-eval "${ice[atpull]#\!}" ${ice[atclone]}; )
+                      print -r -- "<mark>" >! "$local_dir/.zplugin_lstupd"
+                      ZPLG_ICE=()
                   }
               }
             )
-
         fi
+
+        [[ -d "$local_dir/.git" ]] && \
+            (  builtin cd -q "$local_dir" # || return 1 - don't return, maybe it's some hook's logic
+               command git submodule foreach git pull origin master
+            )
 
         local -a log
         { log=( ${(@f)"$(<$local_dir/.zplugin_lstupd)"} ); } 2>/dev/null
@@ -1405,12 +1420,13 @@ ZPLGM[EXTENDED_GLOB]=""
                 )
             fi
 
+            ZPLG_ICE=( "${(kv)ice[@]}" )
             # Run z-plugins atpull hooks (the before atpull-ice ones)
             [[ ${ice[atpull]} != "!"* ]] && {
                 reply=( ${(on)ZPLG_EXTS[(I)z-plugin hook:\\\!atpull <->]} )
                 for key in "${reply[@]}"; do
                     arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
-                    "${arr[5]}" "plugin" "$user" "$plugin" "$id_as"
+                    "${arr[5]}" "plugin" "$user" "$plugin" "$id_as" "$local_dir"
                 done
             }
 
@@ -1422,13 +1438,22 @@ ZPLGM[EXTENDED_GLOB]=""
             reply=( ${(on)ZPLG_EXTS[(I)z-plugin hook:atpull <->]} )
             for key in "${reply[@]}"; do
                 arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
-                "${arr[5]}" "plugin" "$user" "$plugin" "$id_as"
+                "${arr[5]}" "plugin" "$user" "$plugin" "$id_as" "$local_dir"
             done
+            ZPLG_ICE=()
         }
 
         # Store ices to disk at update of plugin
         -zplg-store-ices "$local_dir/._zplugin" ice "" "" "" ""
     fi
+    ZPLG_ICE=( "${(kv)ice[@]}" )
+    # Run z-plugins atpull hooks (the `always' after atpull-ice ones)
+    reply=( ${(on)ZPLG_EXTS[(I)z-plugin hook:%atpull <->]} )
+    for key in "${reply[@]}"; do
+        arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
+        "${arr[5]}" "plugin" "$user" "$plugin" "$id_as" "$local_dir"
+    done
+    ZPLG_ICE=()
 
     return 0
 } # }}}
@@ -1487,11 +1512,18 @@ ZPLGM[EXTENDED_GLOB]=""
         unload blockf pick bpick src as ver silent lucid notify mv cp
         atinit atclone atload atpull nocd run-atpull has cloneonly make
         service trackbinds multisrc compile nocompile nocompletions
-        reset-prompt
+        reset-prompt wrap-track
+        # Include all additional ices – after
+        # stripping them from the possible: ''
+        ${(@s.|.)${ZPLG_EXTS[ice-mods]//\'\'/}}
     )
     nval_ices=(
             blockf silent lucid trackbinds cloneonly nocd run-atpull
             nocompletions svn
+            # Include only those additional ices,
+            # don't have the '' in their name, i.e.
+            # aren't designed to hold value
+            ${(@)${(@s.|.)ZPLG_EXTS[ice-mods]}:#*\'\'*}
     )
 
     # Remove whitespace from beginning of URL
@@ -1607,7 +1639,7 @@ ZPLGM[EXTENDED_GLOB]=""
     snipps=( ${ZPLGM[SNIPPETS_DIR]}/**/._zplugin(N) )
 
     [[ "$st" != "status" && "${ICE_OPTS[opt_-q,--quiet]}" != 1 && -n "$snipps" ]] && \
-        print "${ZPLGM[col-error]}Warning:${ZPLGM[col-rst]} updating also unloaded snippets\n"
+        print "${ZPLGM[col-info]}Note:${ZPLGM[col-rst]} updating also unloaded snippets\n"
 
     for snip in "${ZPLGM[SNIPPETS_DIR]}"/**/._zplugin/mode; do
         [[ ! -f "${snip:h}/id-as" ]] && continue
@@ -1620,10 +1652,10 @@ ZPLGM[EXTENDED_GLOB]=""
 
     if [[ "$st" = "status" ]]; then
         [[ "${ICE_OPTS[opt_-q,--quiet]}" != 1 ]] && \
-            print "${ZPLGM[col-error]}Warning:${ZPLGM[col-rst]} status done also for unloaded plugins"
+            print "${ZPLGM[col-info]}Note:${ZPLGM[col-rst]} status done also for unloaded plugins"
     else
         [[ "${ICE_OPTS[opt_-q,--quiet]}" != 1 ]] && \
-            print "${ZPLGM[col-error]}Warning:${ZPLGM[col-rst]} updating also unloaded plugins"
+            print "${ZPLGM[col-info]}Note:${ZPLGM[col-rst]} updating also unloaded plugins"
     fi
 
     for repo in "${ZPLGM[PLUGINS_DIR]}"/*; do
@@ -1788,8 +1820,8 @@ ZPLGM[EXTENDED_GLOB]=""
     integer correct=0
     [[ -o "KSH_ARRAYS" ]] && correct=1
 
-    for uspl2 in "${(ko)ZPLG_BINDKEYS[@]}"; do
-        [[ -z "${ZPLG_BINDKEYS[$uspl2]}" ]] && continue
+    for uspl2 in "${(ko)ZPLGM[BINDKEYS__@]}"; do
+        [[ -z "${ZPLGM[BINDKEYS__$uspl2]}" ]] && continue
 
         (( !first )) && print
         first=0
@@ -1798,7 +1830,7 @@ ZPLGM[EXTENDED_GLOB]=""
         uspl2col="$REPLY"
         print "$uspl2col"
 
-        string_widget=( "${(z@)ZPLG_BINDKEYS[$uspl2]}" )
+        string_widget=( "${(z@)ZPLGM[BINDKEYS__$uspl2]}" )
         for sw in "${(Oa)string_widget[@]}"; do
             [[ -z "$sw" ]] && continue
             # Remove one level of quoting to split using (z)
@@ -2265,8 +2297,33 @@ ZPLGM[EXTENDED_GLOB]=""
 # $1 - snippet URL or plugin spec (4 formats: user---plugin, user/plugin, user, plugin)
 # $2 - plugin (only when $1 - i.e. user - given)
 -zplg-delete() {
-    setopt localoptions extendedglob nokshglob noksharrays
+    setopt localoptions extendedglob nokshglob noksharrays warncreateglobal
     local the_id="$1${${1:#(%|/)*}:+${2:+/}}$2"
+
+    # Parse options
+    local -a opts
+    opts=( --all --clean --yes )
+    : ${@[@]//(#b)(${(~j.|.)opts})/${ICE_OPTS[${opt_map[${match[1]}]}]::=1}}
+    set -- "${@[@]:#(--all|--clean)}"
+
+    # --all given?
+    if (( ICE_OPTS[opt_--all] )); then
+        -zplg-confirm "Prune all plugins in \`${ZPLGM[PLUGINS_DIR]}'"\
+"and snippets in \`${ZPLGM[SNIPPETS_DIR]}'?" \
+"command rm -rf ${${ZPLGM[PLUGINS_DIR]##[[:space:]]##}:-/tmp/abcEFG312}/*~*/_local---zplugin "\
+"${${ZPLGM[SNIPPETS_DIR]##[[:space:]]##}:-/tmp/abcEFG312}/*~*/plugins"
+        return $?
+    fi
+
+    # --clean given?
+    if (( ICE_OPTS[opt_--clean] )); then
+        -zplg-confirm "Prune ${ZPLGM[col-info]}CURRENTLY NOT LOADED${ZPLGM[col-rst]}"\
+" plugins in ${ZPLGM[PLUGINS_DIR]}"\
+" and snippets in ${ZPLGM[SNIPPETS_DIR]}?" \
+"command rm -rf ${${ZPLGM[PLUGINS_DIR]##[[:space:]]##}:-/tmp/abcEFG312}/*~*/(${(j:|:)${ZPLG_REGISTERED_PLUGINS[@]//\//---}})(N) "\
+"${${ZPLGM[SNIPPETS_DIR]##[[:space:]]##}:-/tmp/abcEFG312}/*~*/(plugins|OMZ::lib|${(j:|:)${(@)${(@)${${ZPLG_SNIPPETS[@]% <*>}[@]:h}//\//--}}})(N)"
+        return $?
+    fi
 
     -zplg-two-paths "$the_id"
     local s_path="${reply[-4]}" s_svn="${reply[-3]}" _path="${reply[-2]}" _filename="${reply[-1]}"
@@ -2318,7 +2375,7 @@ ZPLGM[EXTENDED_GLOB]=""
     print "$1"
     local ans
     read -q ans
-    [[ "$ans" = "y" ]] && { eval "$2"; print "\nDone (action executed, exit code: $?)"; } || print "\nBreak, no action"
+    [[ "$ans" = "y" ]] && { eval "$2"; print "\nDone (action executed, exit code: $?)"; } || { print "\nBreak, no action"; return 1; }
     return 0
 }
 # }}}
@@ -2675,11 +2732,18 @@ EOF
         unload blockf pick bpick src as ver silent lucid notify mv cp
         atinit atclone atload atpull nocd run-atpull has cloneonly make
         service trackbinds multisrc compile nocompile nocompletions
-        reset-prompt
+        reset-prompt wrap-track
+        # Include all additional ices – after
+        # stripping them from the possible: ''
+        ${(@s.|.)${ZPLG_EXTS[ice-mods]//\'\'/}}
     )
     nval_ices=(
             blockf silent lucid trackbinds cloneonly nocd run-atpull
             nocompletions svn
+            # Include only those additional ices,
+            # don't have the '' in their name, i.e.
+            # aren't designed to hold value
+            ${(@)${(@s.|.)ZPLG_EXTS[ice-mods]}:#*\'\'*}
     )
     -zplg-compute-ice "$1${${1:#(%|/)*}:+${2:+/}}$2" "pack" ice local_dir filename || return 1
 
@@ -2738,8 +2802,10 @@ EOF
 # Performs ./configure && make on the module and displays information
 # how to load the module in .zshrc.
 -zplg-build-module() {
+    setopt localoptions localtraps
+    trap 'return 1' INT TERM
     ( builtin cd -q "${ZPLGM[BIN_DIR]}"/zmodules
-      print -r -- "${ZPLGM[col-pname]}== Building module zdharma/zplugin, running: a make clean, then ./configure and then make ==${ZPLGM[col-rst]}"
+      print -r -- "${ZPLGM[col-pname]}== Building module zdharma/zplugin, running: make clean, then ./configure and then make ==${ZPLGM[col-rst]}"
       print -r -- "${ZPLGM[col-pname]}== The module sources are located at: "${ZPLGM[BIN_DIR]}"/zmodules ==${ZPLGM[col-rst]}"
       [[ -f Makefile ]] && { [[ "$1" = "--clean" ]] && {
               print -r -- ${ZPLGM[col-p]}-- make distclean --${ZPLGM[col-rst]}
@@ -2754,6 +2820,7 @@ EOF
       CPPFLAGS=-I/usr/local/include CFLAGS="-g -Wall -O3" LDFLAGS=-L/usr/local/lib ./configure --disable-gdbm && {
           print -r -- ${ZPLGM[col-p]}-- make --${ZPLGM[col-rst]}
           make && {
+            [[ -f Src/zdharma/zplugin.so ]] && cp -vf Src/zdharma/zplugin.{so,bundle}
             print -r -- "${ZPLGM[col-info]}Module has been built correctly.${ZPLGM[col-rst]}"
             -zplg-module info
           } || {
@@ -2789,7 +2856,7 @@ EOF
 —— update [-q] ${ZPLGM[col-pname]}plg-spec${ZPLGM[col-rst]}|URL      – Git update plugin or snippet (or all plugins and snippets if ——all passed); besides -q accepts also ——quiet, and also -r/--reset – this option causes to run git reset --hard / svn revert before pulling changes
 —— status ${ZPLGM[col-pname]}plg-spec${ZPLGM[col-rst]}|URL           – Git status for plugin or svn status for snippet (or for all those if ——all passed)
 —— report ${ZPLGM[col-pname]}plg-spec${ZPLGM[col-rst]}               – show plugin's report (or all plugins' if ——all passed)
-—— delete ${ZPLGM[col-pname]}plg-spec${ZPLGM[col-rst]}|URL           – remove plugin or snippet from disk (good to forget wrongly passed ice-mods)
+—— delete [--all|--clean] ${ZPLGM[col-pname]}plg-spec${ZPLGM[col-rst]}|URL – remove plugin or snippet from disk (good to forget wrongly passed ice-mods); --all – purge, --clean – delete plugins and snippets that are not loaded
 —— loaded|list [keyword]         – show what plugins are loaded (filter with \'keyword')
 —— cd ${ZPLGM[col-pname]}plg-spec${ZPLGM[col-rst]}                   – cd into plugin's directory; also support snippets, if feed with URL
 —— create ${ZPLGM[col-pname]}plg-spec${ZPLGM[col-rst]}               – create plugin (also together with Github repository)
@@ -2841,5 +2908,5 @@ Available ice-modifiers:
         unload blockf on-update-of subscribe pick bpick src as ver silent
         lucid notify mv cp atinit atclone atload atpull nocd run-atpull has
         cloneonly make service trackbinds multisrc compile nocompile
-        nocompletions reset-prompt"
+        nocompletions reset-prompt wrap-track"
 } # }}}

@@ -3,7 +3,6 @@
 	name = katernet
 	signingkey = D0454A980EB8F3D1
 [core]
-[core]
 	editor = mate
 [commit]
 	gpgsign = true

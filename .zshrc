@@ -1,9 +1,9 @@
 # Paths #
 export PATH=/usr/local/bin:/usr/local/sbin:$PATH
-export ZSH=/Users/$(id -nu 501)/.zsh
+typeset -g ZSH=$HOME/.zsh
 
 # Plugins #
-plugins=(git myfunc thefuck z zsh-autosuggestions zsh-syntax-highlighting)
+plugins=(git git-prompt notify zsh-z zsh-autosuggestions fast-syntax-highlighting)
 
 # Sources #
 source "$ZSH"/.zsh_init

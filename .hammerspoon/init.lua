@@ -94,7 +94,7 @@ hs.hotkey.bind(mash, 'I', openiTunes)
 hs.hotkey.bind(mash, 'T', openiTerm)
 
 -- Power events for eject key (broken in Karabiner-Elements)
-local powerEventTap = hs.eventtap.new({ hs.eventtap.event.types.flagsChanged, hs.eventtap.event.types.NSSystemDefined }, function(event)
+powerEventTap = hs.eventtap.new({ hs.eventtap.event.types.flagsChanged, hs.eventtap.event.types.NSSystemDefined }, function(event)
 local flags = hs.eventtap.checkKeyboardModifiers()
 local systemKey = event:systemKey()
 	if flags.ctrl and flags.shift and systemKey.key == "EJECT" and systemKey.down and not systemKey["repeat"] then
@@ -102,17 +102,15 @@ local systemKey = event:systemKey()
 		return true
 	end
 	if flags.ctrl and flags.alt and flags.cmd and systemKey.key == "EJECT" and systemKey.down and not systemKey["repeat"] then
-		--hs.osascript.applescript([[ tell app "System Events" to shut down ]]) -- Shutdown
-		hs.caffeinate.shutdownSystem()
+		hs.caffeinate.shutdownSystem() -- Shutdown
 		return true
 	end
 	if flags.alt and flags.cmd and systemKey.key == "EJECT" and systemKey.down and not systemKey["repeat"] then
-		os.execute("pmset sleepnow") -- Sleep
+		hs.caffeinate.systemSleep() -- Sleep
 		return true
 	end
 	if flags.ctrl and flags.cmd and systemKey.key == "EJECT" and systemKey.down and not systemKey["repeat"] then
-		--hs.osascript.applescript([[ tell app "System Events" to restart ]]) -- Restart
-		hs.caffeinate.restartSystem()
+		hs.caffeinate.restartSystem() -- Restart
 		return true
 	end
 end):start()

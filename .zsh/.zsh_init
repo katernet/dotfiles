@@ -5,6 +5,7 @@ export GPG_TTY=$TTY				# GPG signing
 export CLICOLOR=1				# Enable terminal colors
 export LSCOLORS="Gxfxcxdxbxegedabagacad" 	# ls colors
 typeset -g LS_COLORS="di=1;36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43" # GNU ls colors
+# Prompt options - To disable an option remove 'y'
 typeset -g PROMPT_GIT=y 			# Prompt git status
 typeset -g PROMPT_VENV=y			# Prompt virtual environment
 typeset -g PROMPT_MOTD=y			# Prompt message of the day

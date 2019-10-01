@@ -78,10 +78,7 @@ prompt_venv() {
 prompt_git() {
 	(($+commands[git])) || return # Stop host without git from continuing
 	[ $UID -eq 0 ] && return # No git prompt for root user
-	if [ -n "$PROMPT_GIT" ] && \
-		command git rev-parse --is-inside-work-tree >/dev/null 2>&1; then # Within git directory only
-		local gitdirty
-		read -r gitdirty < <(git status -s)
+	if [[ -n "$PROMPT_GIT" && "$gitrepo" == "true" ]]; then
 		if [[ -n $gitdirty ]]; then # Dirty
 			[ -n "$SSH_CLIENT" ] && print -n " %F{yellow}%}$(gitprompt)%{%f%}" && return
 			prompt_segment yellow black
@@ -98,6 +95,18 @@ prompt_git() {
 		else
 			print -n "\ue725 $(gitprompt)" # branch icon
 		fi
+	fi
+}
+
+# Git dirty/clean status
+prompt_git_dirty() {
+	if [[ -n "$PROMPT_GIT" && "$gitrepo" == "true" ]]; then
+		typeset -g gitdirty
+		# Read async git status output
+		read -r gitdirty <&$1 # Read fd
+		zle && zle .reset-prompt
+		zle -F $1 # Call handler
+		exec {1}<&- # Close fd
 	fi
 }
 
@@ -182,7 +191,14 @@ prompt_preexec() {
 prompt_precmd() {
 	typeset -g retcode=$? # Store return code
 	typeset -g jobnum=$#jobstates # Number of jobs
+	typeset -g gitrepo
+	read -r gitrepo < <(git rev-parse --is-inside-work-tree 2> /dev/null) # Test if inside a git repo
 	((nextcmd==lastcmd)) && unset retcode nextcmd lastcmd || ((lastcmd=nextcmd)) # Unset retcode if buffer is empty
+	# Async git dirty status - Achieves prompt responsivness in large repos
+	if [[ "$gitrepo" == "true" ]]; then
+		exec {FD}< <(git status -s) # Initialize file descriptor fd and fork git status
+		zle -F $FD prompt_git_dirty # Handle input from fd
+	fi
 	# Command time
 	if [[ -n "$RPROMPT_CMDTIME" && -n $timer_sec ]]; then
 		local timer_diff

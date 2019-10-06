@@ -6,7 +6,7 @@ typeset -g ZSH=$HOME/.zsh
 plugins=(git git-prompt notify zsh-z zsh-autosuggestions fast-syntax-highlighting)
 
 # Sources #
-source "$ZSH"/.zsh_init
-source "$ZSH"/.zsh_comp
-source "$ZSH"/.zsh_prompt
-source "$ZSH"/.zsh_alias
+source "$ZSH"/init.zsh
+source "$ZSH"/comp.zsh
+source "$ZSH"/prompt.zsh
+source "$ZSH"/alias.zsh

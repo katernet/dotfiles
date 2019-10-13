@@ -2,14 +2,21 @@
 # Adapted from https://www.zsh.org/mla/workers/2009/msg00415.html
 
 _shrinkpath () {
+	setopt localoptions rc_quotes null_glob
+	unsetopt localoptions case_glob
+
 	typeset -i i
 	typeset -a tree expn
 	typeset result part dir=${1-$PWD}
+
 	[[ -d $dir ]] || return 0
+
 	for part in ${(k)nameddirs}; do
 		[[ $dir == ${nameddirs[$part]}(/*|) ]] && dir=${dir/#${nameddirs[$part]}/\~$part}
 	done
+
 	dir=${dir/#$HOME/\~}
+
 	tree=(${(s:/:)dir})
 	if [[ $tree[1] == \~* ]]; then
 		cd -q ${~tree[1]}
@@ -18,6 +25,7 @@ _shrinkpath () {
 	else
 		cd -q /
 	fi
+
 	for dir in $tree; do
 		if (( $#tree == 1 )); then
 			result+="/$tree"
@@ -29,11 +37,12 @@ _shrinkpath () {
 		until [[ (( ${#expn} == 1 )) || $dir = $expn || $i -gt 99 ]]; do
 			(( i++ ))
 			part+=$dir[$i]
-			expn=($(echo ${part}*(-/)))
+			expn=($(print ${part}*(-/)))
 		done
 		result+="/$part"
 		cd -q $dir
 		shift tree
 	done
-	echo ${result:-/}
+
+	print ${result:-/}
 }

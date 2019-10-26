@@ -15,7 +15,6 @@ d() {
     dirs -v | head -10
   fi
 }
-compdef _dirs d
 
 # Make directory and cd into it
 function take() { 

@@ -51,31 +51,21 @@ HISTORY_IGNORE='(cd|l|ld|lt|d|exit|hist|h|zsht|.|..|...|....|.....)'
 HISTSIZE=50000
 SAVEHIST=10000
 
-# zplugin
+# fpath functions
+fpath+="$ZSH"/functions
+autoload -Uz _funcs _shrinkpath && _funcs
+
+# Zplugin
 declare -A ZPLGM
 ZPLGM[HOME_DIR]="$ZSH"/zplugin
 ZPLGM[PLUGINS_DIR]="$ZSH"/zplugin/plugins
 ZPLGM[COMPLETIONS_DIR]="$ZSH"/zplugin/completions
 
-# Load plugins with zplugin
-source ${ZPLGM[HOME_DIR]}/zplugin.zsh
-for p ($plugins); do
-	if [ -e "$ZSH"/plugins/$p/$p.plugin.zsh ]; then
-		if [ $p = "zsh-autosuggestions" ]; then
-			zplugin ice lucid nocd wait'' atload'_zsh_autosuggest_start' # Required for suggestions to work on login
-			zplugin light "$ZSH"/plugins/$p
-		else
-			zplugin ice lucid wait'' $p
-			zplugin light "$ZSH"/plugins/$p
-		fi
-	fi
-done
-
-# compinit
-# Load dump only once per day and compile for fast load https://gist.github.com/ctechols/ca1035271ad134841284
-() {
+# Faster compinit
+# Load dump only once per day and compile for fast load - https://gist.github.com/ctechols/ca1035271ad134841284
+customcompinit() {
 	autoload -Uz compinit
-	setopt localoptions extendedglob # Enable globbing patterns for this function only
+	setopt local_options extendedglob # Enable extended globbing patterns for this function only
 	local zcd="$ZSH"/.zcompdump
 	local zcdc="$zcd.zwc"
 	if [[ $UID = 0 || -n $SUDO_USER ]]; then # Root user
@@ -84,16 +74,44 @@ done
 	fi
 	if [[ -f "$zcd"(#qN.m+1) || ! -f "$zcd" ]]; then # If dump modified >1 day ago or doesn't exist
 		compinit -d "$zcd" # -d: Custom dump path
-		{ zcompile "$zcd" } &| # Compile dump in background job
+		zcompile "$zcd" &! # Compile dump in a background job
 	else
 		compinit -C -d "$zcd" # -C: Ignore checking
-		{ [[ ! -f "$zcdc" || "$zcd" -nt "$zcdc" ]] && zcompile "$zcd" } &| # If no compiled dump or dump newer than compiled dump
+		[[ ! -f "$zcdc" || "$zcd" -nt "$zcdc" ]] && { zcompile "$zcd" } &! # If no compiled dump or dump newer than compiled dump
 	fi
 }
 
-# fpath functions
-fpath+="$ZSH"/functions
-autoload -Uz _funcs _shrinkpath && _funcs
+# Load Zplugin
+if [ -d ${ZPLGM[HOME_DIR]} ]; then
+	zshcmp ${ZPLGM[HOME_DIR]} # Compile Zplugin files
+	source ${ZPLGM[HOME_DIR]}/zplugin.zsh
+else # Zplugin not installed - clone repo
+	print "## Installing Zplugin ##"
+	(($+commands[git])) || { print "Note: Git is required to install Zplugin"; return } # Git not intalled
+	git clone https://github.com/zdharma/zplugin.git "$ZSH"/zplugin
+	zshcmp "$ZSH"/zplugin
+	source "$ZSH"/zplugin/zplugin.zsh
+fi
+
+# Load plugins with Zplugin
+for p ($plugins); do
+	# If a plugin is not installed - delay motd until the prompt is ready
+	[ -n "$PROMPT_MOTD" ] && () {
+		setopt local_options extendedglob
+		if [[ $p != "git" ]]; then
+			[[ ! -d ${ZPLGM[HOME_DIR]}/plugins/*$p(#qN) ]] && typeset -g delaymotd=0.1
+		else
+			[[ ! -d ${ZPLGM[HOME_DIR]}/snippets/plugins/$p ]] && typeset -g delaymotd=0.1
+		fi
+	}
+	# Load/install plugins
+	[ $p = git ] && { zplugin ice svn wait'' lucid; zplugin snippet OMZ::plugins/$p }
+	[ $p = git-prompt ] && { zplugin ice wait'' lucid; zplugin light katernet/$p }
+	[ $p = notify ] && { zplugin ice wait'' lucid; zplugin light marzocchi/zsh-$p }
+	[ $p = zsh-z ] && { zplugin ice wait'' lucid; zplugin light agkozak/$p }
+	[[ $p = *syntax* ]] && { zplugin ice wait'' nocd lucid atinit'customcompinit; zpcdreplay'; zplugin light zdharma/$p }
+	[[ $p = *suggest* ]] && { zplugin ice lucid nocd wait'' atload'_zsh_autosuggest_start'; zplugin load zsh-users/$p }
+done
 
 # Custom syntax highlighting
 typeset -gA FAST_HIGHLIGHT_STYLES # Prevent style assignment to invalid subscript range

@@ -1,17 +1,20 @@
 # dotfiles
 
-My macOS dotfiles
+My dotfiles
 
 Feel free to use them as needed.
 
 <p align="center">
-  <img src="https://images2.imgbox.com/75/05/5bTasUb6_o.png"/>
+  <img src="https://images2.imgbox.com/6b/95/zMjCj8V7_o.png"/>
 </p>
 
 ### 🖥 zsh
 
-Using zsh from Homebrew with a custom .zshrc, which includes theme support with an async git status in the prompt and plugin support.  
-Shell responsiveness has been achieved using [Zplugin](https://github.com/zdharma/zplugin) turbo mode to load plugins and loading custom functions in fpath. The shell loads in less than 0.04s.  
+Using zsh from Homebrew with a custom .zshrc framework, including theme support with an async git status and plugin support.
+
+The shell loads in 0.03s (0.2s with motd off/in a second tab or window).
+Shell responsiveness is achieved using [Zplugin](https://github.com/zdharma/zplugin) turbo mode to load plugins and loading custom functions in fpath.
+
 To view the functions included in fpath run ```funcs```
 
 ### 🍺 Brew

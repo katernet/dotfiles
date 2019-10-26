@@ -2,24 +2,29 @@
 
 # Load thefuck
 if command -v thefuck >/dev/null 2>&1; then
-  fuck() {
-    eval $(thefuck --alias) && fuck
-  }
+	fuck() {
+		eval $(thefuck --alias) && fuck
+	}
 fi
 
-# dir stack
+# Show/add to directory stack
 d() {
-  if [ -n $1 ]; then
-    dirs "$@"
-  else
-    dirs -v | head -10
-  fi
+	[ -n "$1" ] &&	dirs "$@" || dirs -v | head -10
 }
 
-# Make directory and cd into it
-function take() { 
-	mkdir -p $1
-	cd $1
+# Make a directory and cd into it
+mkcd() {
+	[ -n "$1" ] && mkdir -p "$1" && builtin cd "$1"
+}
+
+# Change to a directory and list contents
+cdls() {
+	builtin cd "$argv[-1]" && ls -al "${(@)argv[1,-2]}"
+}
+
+# Remove .DS_Store files recursively in a directory - default .
+rmdss() {
+	find "${@:-.}" -type f -name ".DS_Store" -print -delete
 }
 
 # Find file containing a string
@@ -92,13 +97,13 @@ extract(){
 	fi
 }
 
-# Run job silently in the background on a random schedule
-timer() {
+# Run job on a random schedule
+randtimer() {
 	local tMin tMax rand randt
-	((tMin=$1*3600)) # Convert Min hrs to sec
-	((tMax=$2*3600)) # Convert Max hrs to sec
-	((rand=tMin+RANDOM%(1+tMax-tMin))) # Generate random time between Min and Max
-	((randt=$rand*100)) # Convert to hundreths sec for zselect
+	tMin=4 # Lower bound in hrs
+	tMax=8 # Higher bound in hrs
+	((rand=RANDOM%(tMax-tMin+1)+tMin)) # Generate a random number between bounds
+	((randt=rand*360000)) # Convert random number to hundreths of sec
 	zmodload zsh/zselect
 	zselect -t $randt # Sleep for random time
 	## Command to run
@@ -106,12 +111,13 @@ timer() {
 	##
 	silentjob # Loop job
 }
+# Run job silently in the background. Runs in an interactive shell and only in first TTY.
 silentjob() {
-	[ $UID -eq 0 ] && return # No silent job for root user
 	if [ -n "$PROMPT_RJOB" ]; then
-		setopt local_options no_monitor no_notify # Prevent job status for this function only
-		{ timer 4 8 } & # Args: Max and Min hrs for timer
-		disown &>/dev/null # Disown background job
+		[ $UID -eq 0 ] && return # No silent job for root user
+		[ ${TTY: -1} -gt 0 ] && return # Only deploy job in primary TTY
+		setopt local_options no_monitor # Prevent job status for this function only
+		{ randtimer } &! # Run a disowned background job
 	fi
 }
 silentjob
@@ -133,6 +139,12 @@ deploymsg() {
 # Local weather
 weather() { curl -s wttr.in | sed -n 1,7p }
 forecast() { curl -s wttr.in | sed -n 8,37p }
+
+# Time zsh startup
+zsht() {
+	local ZSHBIN=$(which zsh)
+	time $ZSHBIN -i -c exit
+}
 
 # Keybind functions
 clear_screen() {	# [Ctrl+L] - Clear screen and unset variables
@@ -166,12 +178,23 @@ fancy_ctrl_z() {	# [Ctrl+Z] - Suspend and return job/buffer
 zle -N fancy_ctrl_z
 bindkey '^Z' fancy_ctrl_z
 
-nano_cmdline () {	# [Ctrl+X,E] - Edit command line in nano
+nano_cmdline() {	# [Ctrl+X,E] - Edit command line in nano
 	local VISUAL='nano -Y sh'
 	edit-command-line
 }
 zle -N nano_cmdline
 bindkey '^X^E' nano_cmdline
+
+scroll_pgup() {		# [Ctrl+K] - Pgup half a page and keep scrollback
+	local page
+	((page=$LINES/2)) # Half of Terminal lines
+	for i in {1..$page}; do
+		print ''
+	done
+	tput cup $(($page-1)) # First line position is 0
+}
+zle -N scroll_pgup
+bindkey '^K' scroll_pgup
 
 # Auto activate/deactivate virtual environment
 auto_venv() {
@@ -184,12 +207,12 @@ auto_venv() {
 		#		local venvname="$i"
 		#	fi
 		#done
-		VIRTUAL_ENV_DISABLE_PROMPT=1 # Disable default virtualenv PS1 to only use in prompt
-		[ -f ./$venvname/bin/activate ] && source ./$venvname/bin/activate 
+		local VIRTUAL_ENV_DISABLE_PROMPT=1 # Disable default virtualenv PS1 to only use in custom prompt
+		[ -f ./$venvname/bin/activate ] && source ./$venvname/bin/activate
 	else
 		local venvdir=${VIRTUAL_ENV##*/}
 		[ "$PWD" != "$venvdir" ] && deactivate 2>/dev/null
-	fi	
+	fi
 }
 chpwd_functions+=(auto_venv) # Add to chpwd function
 
@@ -200,6 +223,8 @@ accept-line() {
 		[ -n $timer_result ] && unset timer_result
 		[ -n $__searching ] && unset __searching
 		[ -n $dmsg ] && unset dmsg
+		[ -n $delaymotd ] && unset delaymotd
+		[ -n $gitdirty ] && unset gitdirty
 	fi
 	if [[ $BUFFER = *(nano|vi|less|hist|man|ssh|suroot)* ]]; then # Buffer contains these programs
 		typeset -g nocmdtime=1 # Blacklist programs from CMDTIME
@@ -212,12 +237,11 @@ zle -N accept-line
 
 # Print a usage for these functions
 funcs() {
-	print "## Useful functions loaded in fpath ##"
-	print "Usage: Run the function name below\n"
+	print "## Useful functions loaded in fpath ##\n"
 
-	print "d		Show directory stack. Set to 'dirs -v' in aliases.\n"
-
-	print "take 		Make directory and cd into it. This is aliased to 't'\n"
+	print "d		Show/add to directory stack"
+	print "mkcd 		Make directory and cd into it"
+	print "cdls 		Change to a directory and list contents\n"
 
 	print "bgc		Print background color chart"
 	print "fgc		Print foreground color chart\n"
@@ -231,39 +255,49 @@ funcs() {
 	print " log [arg2] 	(Optional) log backup date and filename to "$ZSH"/.zbulog"
 	print " logclear	Clear backup log\n"
 
-	print "deploymsg	Display a message below the prompt. This is calling a Zplugin builtin function.\n"
-
 	print "extract		Extract an archive based on the file extension"
 	print "Usage: 		extract [filename]\n"
 
 	print "findstr		Find a file containing a string"
 	print "Usage: 		findstr [directory] [string]"
 	print "Options:"
-	print " directory	(Optional) directory to search. If not used then current directory is used."
+	print " directory	(Optional) directory to search. If not supplied then current directory is used."
 	print " string 	String to search\n"
 
 	print "gacp		Git add file, commit a message and push with one command."
 	print "Usage:		gacp [filename] [message]"
 	print "Options:"
 	print " filename	(Optional) files to add. If not used then all modified files are added (git add -A)"
-	print " commitmessage	Message for commit. Recommened to quote the message.\n"
+	print " message	Commit message. Recommened to quote the message.\n"
 
 	print "gcu 		Git undo last commit and return HEAD to previous state\n"
 
-	print "weather		Show the current weather conditions using wttr.in"		
+	print "rmdss		[macOS] Remove .DS_Store files recursively"
+	print "Usage:		rmdss [directory]"
+	print "Options:"
+	print " directory	(Optional) directory to search. If not supplied then current directory is used.\n"
+
+	print "deploymsg	Display a message below the prompt. This is calling a Zplugin builtin function.\n"
+
+	print "weather		Show the current weather conditions using wttr.in"
 	print "forecast	Show the weather forecast using wttr.in\n"
+
+	print "zsht		Profile zsh startup time. Uses zsh install location from PATH.\n"
 
 	print "## Keybind functions\n"
 
 	print "clear_screen()	[Ctrl+L] Customize builtin clear-screen widget to assist with prompt tasks"
 	print "kill_line()	[Ctrl+U] Customize builtin kill-line widget to assist with prompt tasks"
 	print "fancy_ctrl_z()	[Ctrl+Z] Move current program to background/foreground"
-	print "nano_cmdline()	[Ctrl+X, E] Edit prompt in nano\n"
+	print "nano_cmdline()	[Ctrl+X, E] Edit prompt in nano"
+	print "scroll_pgup()	[Ctrl+K] Page up half a page and keep scrollback\n"
 
 	print "## Functions automatically loaded and not user invoked\n"
 
-	print "accept-line()	Customize builtin accept-line widget to assist with prompt tasks"
+	print "accept-line()	Customized builtin accept-line widget to assist with prompt tasks"
 	print "auto_venv()	Auto activate/deactivate virtual environment when cd-ing into/out of a virtualenv"
 	print "fuck()		Load thefuck plugin"
-	print "silentjob()	Load a silent background job to run on a random schedule - runs fortune\n"
+	print "silentjob()	Load a silent background job - runs randtimer()"
+	print "randtimer()	Run on a random schedule between tMin and tMax hrs - runs fortune by default"
 }
+

@@ -1,4 +1,4 @@
-# Adapted from agnoster ZSH theme https://github.com/agnoster/agnoster-zsh-theme
+# Adapted from agnoster ZSH theme - https://github.com/agnoster/agnoster-zsh-theme
 
 # Begin a segment
 # Takes two arguments, background and foreground. If omitted, renders default background/foreground.
@@ -57,13 +57,12 @@ prompt_context() {
 
 # Current directory
 prompt_dir() {
-	# Truncated paths from shrinkpath function
-	# local trunc="%(4~|%-~/…/%2~|%~)" # Old truncate expression
-	[ -n "$SSH_CLIENT" ] && prompt_segment default default $(_shrinkpath) && return
+	# Truncated paths from shrinkpath function in fpath
+	[ -n "$SSH_CLIENT" ] && prompt_segment default cyan $(_shrinkpath) && return
 	if [ ! -w "${PWD}" ]; then # Directory not writable
 		prompt_segment cyan black "$(_shrinkpath) \uf023" # lock icon
 	else
-		prompt_segment cyan black $(_shrinkpath)
+		prompt_segment cyan black "$(_shrinkpath)"
 	fi
 }
 
@@ -74,12 +73,12 @@ prompt_venv() {
 	fi
 }
 
-# Git dirty/clean status, tracking and local status with gitprompt async plugin
+# Git tracking and local status with git-prompt async plugin
 prompt_git() {
 	(($+commands[git])) || return # Stop host without git from continuing
 	[ $UID -eq 0 ] && return # No git prompt for root user
 	if [[ -n "$PROMPT_GIT" && "$gitrepo" == "true" ]]; then
-		if [[ -n $gitdirty ]]; then # Dirty
+		if [[ -n "$gitdirty" ]]; then # Dirty
 			[ -n "$SSH_CLIENT" ] && print -n " %F{yellow}%}$(gitprompt)%{%f%}" && return
 			prompt_segment yellow black
 		else # Clean
@@ -87,27 +86,25 @@ prompt_git() {
 			prompt_segment green black
 		fi
 		if [[ -e "./.git/BISECT_LOG" ]]; then
-			print -n "\uf977$(gitprompt)" # script icon
+			print -n "\uf977 " # script icon
 		elif [[ -e "./.git/MERGE_HEAD" ]]; then
-			print -n "\ue727 $(gitprompt)" # merge icon
+			print -n "\ue727 " # merge icon
 		elif [[ -e "./.git/rebase" || -e "./.git/rebase-apply" || -e "./.git/rebase-merge" || -e "./.git/../.dotest" ]]; then
-			print -n "\uf1c0 $(gitprompt)" # database icon
+			print -n "\uf1c0 " # database icon
 		else
-			print -n "\ue725 $(gitprompt)" # branch icon
+			print -n "\ue725 " # branch icon
 		fi
+		print -n "$(gitprompt)" # git-prompt plugin
 	fi
 }
 
 # Git dirty/clean status
 prompt_git_dirty() {
-	if [[ -n "$PROMPT_GIT" && "$gitrepo" == "true" ]]; then
-		typeset -g gitdirty
-		# Read async git status output
-		read -r gitdirty <&$1 # Read fd
-		zle && zle .reset-prompt
-		zle -F $1 # Call handler
-		exec {1}<&- # Close fd
-	fi
+	typeset -g gitdirty
+	read -r gitdirty <&$1 # Read fd
+	zle && zle .reset-prompt
+	zle -F $1 # Call handler
+	exec {1}<&- # Close fd
 }
 
 # Return code, cmd time, history line, job status, clock
@@ -115,27 +112,43 @@ prompt_status() {
 	[ -n "$RPROMPT_ON" ] || return
    local symbols=()
 	if [[ -n "$RPROMPT_RETURN" && -n $retcode && $retcode -ne 0 ]]; then # Return code
-		[ -n "$RPROMPT_RETURNSIG" ] && prompt_retsig
+		[[ -n "$RPROMPT_RETURNSIG" && -z "$SSH_CLIENT" ]] && prompt_retsig
 		[ -n "$SSH_CLIENT" ] && prompt_rsegment default 1 "\u21aa$retcode " || prompt_rsegment 1 11 "\u21aa$retcode "
 	fi
 	if [[ -n "$RPROMPT_CMDTIME" && -z $nocmdtime ]]; then # Command time (nocmdtime from accept-line widget)
 		[ -n "$SSH_CLIENT" ] && local clockicon='' || local clockicon='\uf017 '
-		[[ $timer_result -ge 3 && $timer_result -lt 15 ]] && symbols+=("%F{249}$clockicon${timer_result}s")
-		[[ $timer_result -ge 15 ]] && symbols+=("%F{249}$clockicon%F{9}${timer_result}s") # Red time
+		prompt_humantime $timer_result
+		[[ $timer_result -ge 3 && $timer_result -lt 15 ]] && symbols+=("%F{249}$clockicon${humant}")
+		[[ $timer_result -ge 15 ]] && symbols+=("%F{249}$clockicon%F{9}$humant") # Red time
 	fi
 	if [ -n "$RPROMPT_HISTORY" ]; then # History line
-		[ -n "$SSH_CLIENT" ] && prompt_rsegment default default "%h " || prompt_rsegment 245 default "%h "
+		[ -n "$SSH_CLIENT" ] && prompt_rsegment default 245 "%h " || prompt_rsegment 245 default "%h "
 	fi
-	[ -n "$RPROMPT_CLOCK" ] && symbols+=("%F{249}%*") # 24H clock
+	[ -n "$RPROMPT_CLOCK" ] && symbols+=("%F{249}%D{%H:%M:%S}") # 24H clock
 	if [ -n "$SSH_CLIENT" ]; then
-		symbols+=([$jobnum])
+		[ "$jobnum" -gt 0 ] && symbols+=("[$jobnum]") # Number of jobs
 	else
 		[ "$jobnum" -eq 1 ] && symbols+=("%F{252}\uf013%f") # 1 job
 		[ "$jobnum" -gt 1 ] && symbols+=("%F{252}\uf085%f") # >1 job
 	fi
 	if [ -n "${symbols[*]}" ]; then
-		[ -n "$SSH_CLIENT" ] && prompt_rsegment default default "${symbols[*]}" || prompt_rsegment 235 default "${symbols[*]}"
+		[ -n "$SSH_CLIENT" ] && prompt_rsegment default 23 "${symbols[*]}" || prompt_rsegment 235 default "${symbols[*]}"
 	fi
+}
+
+# Convert time to a human readable format - Adapted from https://github.com/sindresorhus/pretty-time-zsh
+prompt_humantime() {
+	typeset -g humant
+	local human total_seconds=$1
+	local days=$(( total_seconds / 60 / 60 / 24 ))
+	local hours=$(( total_seconds / 60 / 60 % 24 ))
+	local minutes=$(( total_seconds / 60 % 60 ))
+	local seconds=$(( total_seconds % 60 ))
+	(( days > 0 )) && human+="${days}d "
+	(( hours > 0 )) && human+="${hours}h "
+	(( minutes > 0 )) && human+="${minutes}m "
+	human+="${seconds}s"
+	humant=$human
 }
 
 # Return code names. If no match, then use return code number.
@@ -166,18 +179,21 @@ prompt_retsig() {
 # Message of the day
 prompt_motd() {
 	[ -n "$SSH_CLIENT" ] && print "### [SSH] You have logged into $HOST ###" # SSH message
-	strftime -s hour %H $EPOCHSECONDS # Get hour of day
-	local greeting
-	# Display a greeting for the time of day. A random greeting is chosen from the array.
-	(($hour >= 1  && $hour <= 4)) && greeting=(Yawn "Back to bed?")
-	(($hour >= 4  && $hour <= 6)) && greeting=("Good morning" "Rise and shine")
-	(($hour >= 6  && $hour <= 12)) && greeting=("Good morning" Morning Hello Hi)
-	(($hour >= 12 && $hour <= 18)) && greeting=("Good afternoon" Afternoon Greetings Hi Howdy Yo)
-	(($hour >= 18 && $hour <= 24)) && greeting=("Good evening" Evening "What's up" Hey Yo)
-	print "$greeting[RANDOM % $#greeting + 1] $USERNAME welcome to zsh"
+	if [[ $1 == "+greeting" ]]; then
+		strftime -s hour %H $EPOCHSECONDS # Get hour of day
+		local greeting
+		# Display a greeting for the time of day. A random greeting is chosen from the array.
+		(($hour >= 3  && $hour < 6)) && greeting=(Yawn "Back to bed?")
+		(($hour >= 6  && $hour < 8)) && greeting=("Good morning" "Rise and shine")
+		(($hour >= 8  && $hour < 12)) && greeting=("Good morning" Morning Hello Howdy)
+		(($hour >= 12 && $hour < 18)) && greeting=("Good afternoon" Afternoon Greetings Hi)
+		(($hour >= 0 && $hour < 3)) || (($hour >= 18 && $hour <= 23)) && greeting=("Good evening" Evening Hey "What's up")
+		print "$greeting[RANDOM % $#greeting + 1] $USERNAME welcome to zsh"
+		print "Look at the world, life itself is reason enough to exist. There's no meaning apart from the one we give it." # https://www.youtube.com/watch?v=-3frA_rj918&lc=UgxI05A4qsf77LylQ8p4AaABAg.8Whn3pcr1mA8n4H4rMvrV8
+	fi
 	# Show todo.txt todo list
 	local todotxt="$ZSH"/todo.txt/todo.txt
-	[[ -f "$todotxt" &&  -s "$todotxt" ]] && { print TODO: && <"$todotxt" }
+	[[ -f "$todotxt" &&  -s "$todotxt" ]] && { print " "; print "TODO:" && <"$todotxt" }
 }
 
 # Evaluate command
@@ -191,11 +207,10 @@ prompt_preexec() {
 prompt_precmd() {
 	typeset -g retcode=$? # Store return code
 	typeset -g jobnum=$#jobstates # Number of jobs
-	typeset -g gitrepo
-	read -r gitrepo < <(git rev-parse --is-inside-work-tree 2> /dev/null) # Test if inside a git repo
+	[[ -n "$PROMPT_GIT" && (($+commands[git])) ]] && { typeset -g gitrepo; read -r gitrepo < <(git rev-parse --is-inside-work-tree 2> /dev/null) } # Test if inside a git repo
 	((nextcmd==lastcmd)) && unset retcode nextcmd lastcmd || ((lastcmd=nextcmd)) # Unset retcode if buffer is empty
 	# Async git dirty status - Achieves prompt responsivness in large repos
-	if [[ "$gitrepo" == "true" ]]; then
+	if [[ -n "$PROMPT_GIT" && (($+commands[git])) && "$gitrepo" == "true" ]]; then
 		exec {FD}< <(git status -s) # Initialize file descriptor fd and fork git status
 		zle -F $FD prompt_git_dirty # Handle input from fd
 	fi
@@ -204,7 +219,7 @@ prompt_precmd() {
 		local timer_diff
 		((timer_diff=EPOCHREALTIME-timer_sec))
 		typeset -g timer_result
-		read -r timer_result < <(printf '%.*f\n' 1 ${timer_diff}) # 1 decimal
+		read -r timer_result < <(printf '%.*f\n' 0 ${timer_diff}) # 0 decimal
 		unset timer_sec
 	fi
 	# Tab and window title
@@ -240,33 +255,37 @@ prompt_setup() {
 	autoload -Uz add-zsh-hook colors && colors
 	add-zsh-hook preexec prompt_preexec
 	add-zsh-hook precmd prompt_precmd
-	[ -n "$RPROMPT_ON" ] && zmodload zsh/parameter # For use in job number count
-	[ -n "$RPROMPT_CLOCKTICK" ] && zmodload zsh/sched # Schedule for ticking clock
-	[[ -n "$RPROMPT_CMDTIME" || -n "$PROMPT_MOTD" ]] && zmodload zsh/datetime # For use in command time and motd
+	[[ -n "$RPROMPT_CMDTIME" || -n "$PROMPT_MOTD" ]] && ! type strftime > /dev/null && { zmodload zsh/datetime } # Time module for cmdtime and motd
 	[ "$USER" != "$DEFAULTUSER" ] && autoload -Uz _shrinkpath # Load shrinkpath function for other users
 
-	# Display motd under prompt. Duration of message is set in TMOUT.
-	[[ -n "$PROMPT_MOTD" && $UID -ne 0 ]] && deploymsg "$(prompt_motd)" # Function from fpath
+	# Display motd under prompt - function from fpath. Duration of message is set by TMOUT.
+	if [[ -n "$PROMPT_MOTD" && $UID -ne 0 && ${TTY: -1} -eq 0 ]]; then
+		if [ -n "$delaymotd" ]; then
+			deploymsg @sleep:$delaymotd "$(prompt_motd +greeting)"
+		else
+			deploymsg "$(prompt_motd +greeting)"
+		fi
+	fi
 
 	# Refresh prompt for ticking clock
-	if [[ -n "$RPROMPT_CLOCK" && -n "$RPROMPT_CLOCKTICK" ]]; then
+	if [[ -n "$RPROMPT_ON" && -n "$RPROMPT_CLOCK" && -n "$RPROMPT_CLOCKTICK" ]]; then
 		schedprompt() {
 			local -i i=${"${(@)zsh_scheduled_events#*:*:}"[(I)schedprompt]}
 			((i)) && sched -$i
 			# Reset prompt unless a condition is met
-			[[ $ZLE_STATE = *(complete|delete|history|insert|list|overwrite|search)* \
-				|| -n $paste || -n $__searching || -n $dmsg ]] || { zle && zle .reset-prompt }
-			sched +1 schedprompt
+			[[ $WIDGET = *(complete|delete|list|search)* || $ZLE_STATE = *(history|insert|overwrite)* \
+				|| -n $paste || -n $__searching || -n $dmsg || -n $delaymotd ]] || { zle && zle .reset-prompt }
+			sched +1 schedprompt # 1s schedule
 		}
 		schedprompt
 	fi
 
 	# Clear motd after timeout
-	if [[ -n "$PROMPT_MOTD" && -n $dmsg ]]; then
-		TMOUT=7 # Timeout for TRAPALRM in sec
+	if [[ -n "$PROMPT_MOTD" && -n "$dmsg" ]]; then
+		TMOUT=10 # Timeout for TRAPALRM in sec
 		TRAPALRM() {
 			[ -n "$RPROMPT_CLOCKTICK" ] && unset dmsg # Continue reset-prompt in schedprompt
-			[[ $WIDGET = *complete* ]] || zle -M "" # Clear motd
+			[[ -n "$SSH_CLIENT" || $WIDGET = *complete* || -n $delaymotd ]] || zle -M "" # Clear motd
 			unset TMOUT
 		}
 	fi
@@ -274,16 +293,16 @@ prompt_setup() {
 	# Ctrl-C
 	if [[ -n "$RPROMPT_RETURN" || -n "$RPROMPT_CLOCKTICK" ]]; then
 		TRAPINT() {
-			[ -n $paste ] && unset paste
-			[ -n $retcode ] && unset retcode
-			[ -n $__searching ] && unset __searching
+			[ -n "$paste" ] && unset paste
+			[ -n "$retcode" ] && unset retcode
+			[ -n "$__searching" ] && unset __searching
 			local ret
 			((ret=128+$1))
 			return ret # Restore return status
 		}
 	fi
 
-	# Prompts
+	# Prompt
 	PROMPT='%{%f%b%k%}$(prompt_build)'
 	RPROMPT='%{%f%b%k%}$(rprompt_build)'
 }

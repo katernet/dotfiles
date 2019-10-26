@@ -300,4 +300,3 @@ funcs() {
 	print "silentjob()	Load a silent background job - runs randtimer()"
 	print "randtimer()	Run on a random schedule between tMin and tMax hrs - runs fortune by default"
 }
-

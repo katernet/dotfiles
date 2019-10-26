@@ -57,4 +57,3 @@ alias ~scripts='~/Library/Scripts'
 alias scripts='/Library/Scripts/$(hostname)\ Scripts'
 alias tmpdir='"$TMPDIR"'
 alias tmp='/private/tmp'
-

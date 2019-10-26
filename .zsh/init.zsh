@@ -1,11 +1,9 @@
 # Vars
-typeset -U PATH					# Fix path appends
+typeset -U PATH					# Set paths as unique
 typeset -g DEFAULTUSER=${HOME##*/}		# Logged in user
 export GPG_TTY=$TTY				# GPG signing
 export CLICOLOR=1				# Enable terminal colors
 export LSCOLORS="Gxfxcxdxbxegedabagacad" 	# ls colors
-typeset -g LS_COLORS="di=1;36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43" # GNU ls colors
-# Prompt options - To disable an option remove 'y'
 typeset -g PROMPT_GIT=y 			# Prompt git status
 typeset -g PROMPT_VENV=y			# Prompt virtual environment
 typeset -g PROMPT_MOTD=y			# Prompt message of the day
@@ -23,33 +21,33 @@ setopt always_to_end 		# Cursor placed at end after completion
 setopt auto_cd 			# Change directory without cd
 setopt auto_menu 		# Show completion menu on successive tab press
 setopt auto_pushd 		# Make cd push the old directory onto the directory stack
-setopt pushdignoredups 		# Don’t push multiple copies of the same directory onto the directory stack
-setopt pushdminus 		# Exchanges meanings of + and - with a number specified directory in the stack
+setopt pushdignoredups 		# Don’t push multiple copies of directories onto the directory stack
+setopt pushdminus 		# Exchange meanings of + and - with a number in the directory stack
 setopt complete_in_word 	# Allow completion from within a word/phrase
-setopt globdots			# Dotfiles are matched without explicitly specifying the dot
-setopt hist_expire_dups_first 	# Delete duplicates first when HISTFILE size exceeds HISTSIZE
+setopt globdots			# Dotfiles are matched in completions without specifying the dot
 setopt hist_ignore_dups 	# Ignore duplicated commands history list
+setopt hist_expire_dups_first 	# Delete duplicates first when HISTFILE size exceeds HISTSIZE
 setopt hist_ignore_space 	# Ignore commands that start with space
-setopt extended_history		# Record timestamp of command in HISTFILE
+setopt extended_history		# Record timestamp of command in history
 setopt inc_append_history 	# Add commands to HISTFILE in order of execution
-setopt interactive_comments 	# Allow comments even in interactive shells
+setopt interactive_comments 	# Allow comments in interactive shells
 setopt prompt_subst 		# Allow expansion in prompts
 unsetopt flowcontrol 		# Disable output flow control in the shell’s editor
 unsetopt histverify 		# Disable confirmation in expansion
 unsetopt list_beep		# Turn off completion list beeps
 
-# Keybinds
+# History
+HISTFILE="$ZSH"/hist.zsh
+HISTORY_IGNORE='(cd|l|ld|lt|d|exit|hist|h|zsht|.|..|...|....|.....)'
+HISTSIZE=50000
+SAVEHIST=10000
+
+# Keybinds (keybind functions are set in fpath)
 bindkey '^[[3~'		delete-char 			# [Del]  - Forward delete
 bindkey '^[[H'		beginning-of-line 		# [Home] - Beginning of line
 bindkey '^[[F'		end-of-line 			# [End]  - End of line
 bindkey '^[[A'		up-line-or-beginning-search 	# [Up]   - History search up
 bindkey '^[[B'		down-line-or-beginning-search 	# [Down] - History search down
-
-# History
-HISTFILE="$ZSH"/.zsh_hist
-HISTORY_IGNORE='(cd|l|ld|lt|d|exit|hist|h|zsht|.|..|...|....|.....)'
-HISTSIZE=50000
-SAVEHIST=10000
 
 # fpath functions
 fpath+="$ZSH"/functions
@@ -79,6 +77,14 @@ customcompinit() {
 		compinit -C -d "$zcd" # -C: Ignore checking
 		[[ ! -f "$zcdc" || "$zcd" -nt "$zcdc" ]] && { zcompile "$zcd" } &! # If no compiled dump or dump newer than compiled dump
 	fi
+}
+
+# Compile .zsh files. Recompile files if newer than compiled version.
+zshcmp() {
+	zfiles=("$1"/*.zsh) # Array of .zsh files within arg directory
+	for i in "${zfiles[@]}"; do
+		[[ ! -f "$i".zwc || "$i" -nt "$i".zwc ]] && { zcompile "$i" } &!
+	done
 }
 
 # Load Zplugin
@@ -113,8 +119,11 @@ for p ($plugins); do
 	[[ $p = *suggest* ]] && { zplugin ice lucid nocd wait'' atload'_zsh_autosuggest_start'; zplugin load zsh-users/$p }
 done
 
-# Custom syntax highlighting
-typeset -gA FAST_HIGHLIGHT_STYLES # Prevent style assignment to invalid subscript range
+# Compile config files
+zshcmp "$ZSH" 2> /dev/null
+
+# Syntax highlighting
+typeset -gA FAST_HIGHLIGHT_STYLES # Set associative array
 FAST_HIGHLIGHT_STYLES[alias]=fg=magenta
 FAST_HIGHLIGHT_STYLES[globbing]=fg=99 		# SlateBlue1
 FAST_HIGHLIGHT_STYLES[history-expansion]=fg=99
@@ -123,6 +132,7 @@ FAST_HIGHLIGHT_STYLES[path-to-dir]=underline
 FAST_HIGHLIGHT_STYLES[reserved-word]=fg=yellow
 FAST_HIGHLIGHT_STYLES[single-hyphen-option]=none
 FAST_HIGHLIGHT_STYLES[double-hyphen-option]=none
+FAST_HIGHLIGHT_STYLES[whatis_chroma_type]=0
 
 # zsh-autosuggestions
 ZSH_AUTOSUGGEST_USE_ASYNC=1

@@ -17,6 +17,8 @@ Shell responsiveness is achieved using [Zplugin](https://github.com/zdharma/zplu
 
 To view the functions included in fpath run ```funcs```
 
+Prompt features, git, motd, ticking clock, can be allowed in init.zsh variables. To turn off an option remove the 'y'.
+
 ### 🍺 Brew
 My [Homebrew](https://github.com/Homebrew/brew) packages and casks.
 

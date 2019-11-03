@@ -30,9 +30,9 @@ rmdss() {
 # Find file containing a string
 findstr() {
 	if [ $# -eq 1 ]; then
-		find . -type f -exec grep -r --exclude \*.zsh_hist "$1" /dev/null {} \; # Current directory
+		find . -type f -exec grep -r --exclude={hist.zsh,\*.db,.zcompdump\*,\*.zwc} "$1" /dev/null {} \; # Current directory
 	elif [ $# -eq 2 ]; then
-		find "$1" -type f -exec grep -r --exclude \*.zsh_hist "$2" /dev/null {} \; # Directory specified in 1st arg
+		find "$1" -type f -exec grep -r --exclude={hist.zsh,\*.db,.zcompdump\*,\*.zwc} "$2" /dev/null {} \; # Directory specified in 1st arg
 	fi
 }
 

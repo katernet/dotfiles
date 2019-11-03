@@ -1,0 +1,28 @@
+# Version 1.0 -- Generated content!
+fontSize         = 11
+softTabs         = false
+softWrap         = false
+tabSize          = 3
+
+include = "{$include,.*}"
+exclude = "{$exclude,.DS_Store,.git*}"
+
+[ * ]
+disableExtendedAttributes = true
+
+[ .* ]
+disableExtendedAttributes = true
+
+[ *.sh ]
+filetype         = source.shell
+
+[ *.zsh ]
+fileType         = source.shell
+
+[ source ]
+softTabs         = false
+softWrap         = false
+
+[ source.shell ]
+softTabs         = false
+softWrap         = false

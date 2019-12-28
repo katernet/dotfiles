@@ -4,6 +4,7 @@ cmake
 cowsay
 docbook-xsl
 fortune
+git
 gnupg
 gobject-introspection
 gptfdisk

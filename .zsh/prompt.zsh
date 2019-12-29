@@ -193,7 +193,15 @@ prompt_motd() {
 	fi
 	# Show todo.txt todo list
 	local todotxt="$ZSH"/todo.txt/todo.txt
-	[[ -f "$todotxt" &&  -s "$todotxt" ]] && { print " "; print "TODO:" && <"$todotxt" }
+	while read line; do # Store each line of todo list in an array
+	    arr+=("$line")
+	done < "$todotxt"
+	if [[ -s "$todotxt" && -n "${arr[1]// }" ]]; then # File size not zero and first line not empty
+		print " "; print "TODO:"
+		for i in "${arr[@]}"; do
+			print "$i"
+		done
+	fi
 }
 
 # Evaluate command

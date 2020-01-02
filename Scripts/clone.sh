@@ -5,24 +5,25 @@
 # Requires rsync 3
 # Adapted from http://nicolasgallagher.com/mac-osx-bootable-backup-drive-with-rsync
 
-dst="/Volumes/Backup/" 	# Destination disk
-src="/" 		# Source
-mnt=0 			# 1: Mount disk and unmount when finished / 0: No mount/unmount
+dst="/Volumes/Backup" 	# Destination disk
+src="/"                 # Source
+mnt=0 			# 1: Mount disk and unmount when finished | 0: No mount/unmount
 
 # Disk mounter
 mount() {
+	dName=$(basename "$dst")
 	if [ $mnt = 1 ]; then
 		case "$1" in
 		attach)
 			# Mount backup disk if not mounted
 			if [ ! -d "$dst" ]; then
-				diskutil mount $(basename "$dst")
+				diskutil mount "$dName"
 			fi
 			;;
 		detach)
 			# Unmount backup disk if mounted
 			if [ -d "$dst" ]; then
-        			diskutil unmount $(basename "$dst")
+				diskutil unmount "$dName"
 			fi
 			;;
 		esac
@@ -41,21 +42,15 @@ if [ ! -w "$dst" ]; then
 	exit 1
 fi
 
-# Clone
-# --acls 		Update the destination ACLs to be the same as the source ACLs
-# --archive 		Turn on archive mode (recursive copy + retain attributes)
-# --delete 		Delete any files that have been deleted locally
-# --delete-excluded 	Delete any files (on dst) that are part of the list of excluded files
-# --hard-links 		Preserve hard-links
-# --info=progress2 	Progress of transfer
-# --one-file-system 	Don't cross device boundaries (ignore mounted volumes)
-# --sparse 		Handle sparse files efficiently
-# --xattrs 		Update the remote extended attributes to be the same as the local ones
-
 # Excludes
 files=(
-	.Spotlight-*/
+	.DocumentRevisions-V*
+	.fseventsd
+	.hotfiles.btree
+	.Spotlight-V*/
+	.TemporaryItems
 	.Trashes
+	/.vol/*
 	/afs/*
 	/automount/*
 	/cores/*
@@ -70,30 +65,45 @@ files=(
 	/Volumes/*
 	*/.Trash
 )
-excludes=()
 for f in "${files[@]}"; do
 	excludes+=(--exclude "$f")
 done
 
-echo "Start rsync"
+echo "Start clone..."
+
+# Clone
+# --acls 		Update the destination ACLs to be the same as the source ACLs
+# --archive 		Turn on archive mode (recursive copy + retain attributes)
+# --delete 		Delete any files that have been deleted locally
+# --delete-excluded 	Delete any files (on dst) that are part of the list of excluded files
+# --exclude		Exclude files matching pattern
+# --hard-links 		Preserve hard-links
+# --info=progress2 	Progress of transfer
+# --one-file-system 	Don't cross device boundaries (ignore mounted volumes)
+# --sparse 		Handle sparse files efficiently
+# --xattrs 		Update the remote extended attributes to be the same as the local ones
 
 rsync --acls \
-	--archive \
-	--delete \
-	--delete-excluded \
-	"${excludes[@]}" \
-	--hard-links \
-	--one-file-system \
-	--sparse \
-	--xattrs \
-	"$src" "$dst"
+      --archive \
+      --delete \
+      --delete-excluded \
+      "${excludes[@]}" \
+      --hard-links \
+      --info=progress2 \
+      --one-file-system \
+      --sparse \
+      --xattrs \
+      "$src" "$dst"
 
-echo "End rsync"
+echo "Finished clone"
+
+# Turn off Time Machine on clone
+plutil -replace AutoBackup -bool false "$dst"/Library/Preferences/com.apple.TimeMachine.plist
 
 # Set disk as bootable
 if bless --info "$dst" | grep -q "No Blessed System Folder"; then # Test if not bootable
 	sudo bless -folder "$dst"/System/Library/CoreServices
-	echo "Disk $dst set as bootable"
+	[ $? = 0 ] && echo "Clone: Set disk $dName as bootable" || echo "Clone: Failed to set disk $dName as bootable" 1>&2
 fi
 
 mount detach

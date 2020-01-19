@@ -23,7 +23,10 @@ mount() {
 		detach)
 			# Unmount backup disk if mounted
 			if [ -d "$dst" ]; then
-				diskutil unmount "$dName"
+				# Wait until disk unmount succeeds
+				while ! diskutil unmount "$dName" 2>/dev/null; do
+					true
+				done
 			fi
 			;;
 		esac

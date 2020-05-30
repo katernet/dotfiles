@@ -67,7 +67,7 @@ customcompinit() {
 	local zcd="$ZSH"/.zcompdump
 	local zcdc="$zcd.zwc"
 	if [[ $UID = 0 || -n $SUDO_USER ]]; then # Root user
-		compinit -i -d "$zcd"_$USER # Dump for root user -i: Ignore insecure files
+		compinit -u -d "$zcd"_$USER # Dump for root user -u: Accept insecure files
 		return
 	fi
 	if [[ -f "$zcd"(#qN.m+1) || ! -f "$zcd" ]]; then # If dump modified >1 day ago or doesn't exist

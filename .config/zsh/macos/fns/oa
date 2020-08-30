@@ -1,0 +1,9 @@
+# Fuzzy search Applications using fzy and launch
+oa () {
+	(($+commands[fzy])) || { echo "Function requires: fzy" >&2 && return 1 }
+	setopt local_options nullglob
+	local paths=(~/Applications/*(^D) /Applications/*(^D))
+	local RESULT=$(find "${paths[@]}" -maxdepth 1 -type d -name "*.app" | fzy)
+	[ -z "$RESULT" ] && return
+	open -a "$RESULT"
+}

@@ -1,0 +1,19 @@
+# Auto activate/deactivate python virtual environment
+avenv() {
+	# Activate venv
+	auto_venv_activate() {
+		local VIRTUAL_ENV_DISABLE_PROMPT=1 # Disable python builtin venv PS1
+		source ./bin/activate # Source venv activate script
+		local venvdir="$VIRTUAL_ENV" # Store venv path
+	}
+	if [ -z "$VIRTUAL_ENV" ]; then # No python venv path set
+		if [ -f ./bin/activate ]; then # Venv activtate script exists
+			auto_venv_activate
+		fi
+	else
+		[[ ! $PWD =~ "$VIRTUAL_ENV" ]] && deactivate # PWD not equivalent to venv path - deactivate
+		if [[ -f ./bin/activate && $PWD != "$venvdir" ]]; then # Changed to another venv path
+			auto_venv_activate
+		fi
+	fi
+}

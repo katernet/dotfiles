@@ -1,0 +1,7 @@
+# Display a message below the prompt - zinit builtin
+dmsg() {
+	if [ -f ${ZINIT[HOME_DIR]}/zinit.zsh ]; then
+		typeset -g dm=y
+		+zinit-deploy-message "$@"
+	fi
+}

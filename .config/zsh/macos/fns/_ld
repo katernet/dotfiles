@@ -1,0 +1,38 @@
+#compdef ld
+
+_ld() {
+	local cmds state ret=1
+	_arguments \
+	    '1: :->arg1' \
+	    '2: :->arg2'
+
+	cmds=(
+	    'l:Show summary of all jobs or a specific job'
+	    'd:List all disabled jobs'
+	    'e:Edit job plist in EDITOR'
+	    'f:Get job plist location'
+	    'p:Print summary of the domain or a specific job'
+	    'load:Load job'
+	    'unload:Unload job'
+	    'reload:Reload job'
+	    'kstart:Kickstart job'
+	    'kill:Kill job'
+	    'enable:Enable job'
+	    'disable:Disable job'
+	)
+
+	case $state in
+	    arg1)
+	    	_arguments '--help [Show help]'
+		cmds+=('root:Run with root permissions')
+	        _describe 'command' cmds
+	        ret=0
+		;;
+	    arg2)
+		[[ $words[2] == "root" ]] && _describe 'command' cmds
+	        ret=0
+		;;
+	esac
+}
+
+return $ret

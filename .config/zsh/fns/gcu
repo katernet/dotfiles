@@ -1,0 +1,5 @@
+# Git undo last commit
+gcu() {
+	git reset HEAD^
+	git push -f
+}

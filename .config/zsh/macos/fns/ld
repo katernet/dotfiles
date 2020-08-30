@@ -1,0 +1,134 @@
+# A launchd wrapper function with helper utilities
+# Adapted from lctl https://github.com/newtonne/lctl
+
+ld() {
+	setopt local_options extendedglob nullglob
+	declare -a jobs_path jobs_plist jobs_file jobs_name jobs_search jobs_exactsearch
+	
+	# Setup launchd job paths. If script is run as root, the root Library locations are used.
+	if [[ $UID -ne 0 || -z $SUDO_USER ]]; then
+		jobs_path=(~/Library/LaunchAgents /Library/LaunchAgents)
+	else
+		jobs_path=(/Library/LaunchDaemons)
+	fi
+
+	# Collect plists paths in job path
+	for i in ${jobs_path[@]}; do
+		jobs_plist+=("$i"/*.plist)
+	done
+
+	jobs_file=("${jobs_plist[@]##*/}") # Array of plist filenames
+	jobs_name=("${jobs_file[@]%.plist}") # Array of job names
+	jobs_regex="${${jobs_name[@]}//${IFS:0:1}/|}" # Seperated job names
+
+	# Search jobs from jobname input
+	get_job() {
+		# Jobs array is empty - No plists
+		[ "${#jobs_name[@]}" -eq 0 ] && { echo "Error: no launchd plists found in $jobs_path" >&2 && return 1 }
+
+		declare -a job_search
+		job_search=(${(M)jobs_plist:#(#i)*${1}*}) # Case-insensitive glob search of plist files
+		jobs_found="${#job_search[@]}" # Number of results
+
+		case $jobs_found in
+			0)
+				echo "Error: no launchd jobs found for \"$1\"" >&2
+				return 1
+				;;
+			1)
+				local idx=1
+				;;
+			*)
+				declare -a job_exactsearch
+				job_exactsearch=("$jobs_path"/*".$1."*plist) # Granular search
+				if [ ${#job_exactsearch[@]} -eq 1 ]; then
+					declare -a job_search
+					job_search=("${job_exactsearch[@]}")
+					local idx=1
+				else
+					# More than one result. Present search results for selection.
+					echo "$jobs_found jobs found for \"$1\":" >&2
+					local i n
+					for i in "${job_search[@]##*/}"; do
+						((n++))
+						printf "  [%s] %s\n" $n "${i%%.plist}" >&2
+					done
+					local j
+					while true; do
+						read "j?Select: "
+						if (( j >= 1 && j <= jobs_found )); then
+							local idx=$j
+							printf "\n"
+							break
+						else
+							echo "Number not in range, try again." >&2
+						fi
+					done
+				fi
+				;;
+		esac
+		
+		job_plist="${job_search[$idx]}" # Job plist filename result
+		job_name="${job_plist##*/}"
+		job_name="${job_name%.plist}" # Job name result
+	}
+
+	# Commands to run on the job
+	cmd() {
+		[[ -z "$jobs_file" ]] && { echo "Error: no launchd jobs found in $jobs_path" >&2 && return 1 }
+		[[ $UID -eq 0 || -n $SUDO_USER ]] && local domain="system" || local domain="gui/$UID"
+		if [ $# -eq 1 ]; then
+			[ "$1" = "l" ]        && launchctl list | grep -E "^PID|${jobs_regex}" | sort -k3,3
+			[ "$1" = "d" ]        && launchctl print-disabled "$domain" | grep -E "${jobs_regex}" | grep "true" | cut -d'"' -f2
+			[ "$1" = "p" ]        && launchctl print "$domain"
+			[[ "$1" != (l|d|p) ]] && { echo "Error: command requires a job name parameter. See ld --help" >&2 && return 1 }
+		elif [ $# -eq 2 ]; then
+			[ "$1" = "l" ]        && launchctl list "$job_name"
+			[ "$1" = "e" ]        && ${EDITOR:-vim} "$job_plist"
+			[ "$1" = "f" ]        && echo "$job_plist"
+			[ "$1" = "p" ]        && launchctl print "$domain/$job_name"
+			[ "$1" = "load" ]     && launchctl bootstrap "$domain" "$job_plist"
+			[ "$1" = "unload" ]   && launchctl bootout "$domain" "$job_plist"
+			[ "$1" = "reload" ]   && { launchctl bootout "$domain" "$job_plist" && launchctl bootstrap "$domain" "$job_plist" }
+			[ "$1" = "kstart" ]   && launchctl kickstart "$domain/$job_name" 
+			[ "$1" = "kill" ]     && launchctl kill SIGTERM "$domain/$job_name"
+			[ "$1" = "enable" ]   && launchctl enable "$domain/$job_name"
+			[ "$1" = "disable" ]  && launchctl disable "$domain/job_name"
+		fi
+		return 0
+	}
+	
+	# Setup
+	if [[ $1 == "--help" || $1 == "-h" ]]; then
+		print "A launchd wrapper function for non system launchd jobs"
+		print -P "Usage: %F{green}ld%f [<command>] [<jobname>]\n"
+		print "command"
+		print " l 	 Summary of a job/all jobs if no job name provided"
+		print " d 	 List all disabled jobs"
+		print " e 	 Edit job plist in EDITOR"
+		print " f 	 Get job plist location"
+		print " p 	 Print job information about the domain or a specific job"
+		print " load 	 Load a job"
+		print " unload  Unload a job"
+		print " reload  Reload a job"
+		print " kstart  Kickstart a job - restart job if running"
+		print " kill 	 Kill a job"
+		print " enable  Enable a job"
+		print " disable Disable a job\n"
+		print "jobname  Case-insensitive pattern match of job name.\n"
+		print "Optional"
+		print " root 	 Run with root permissions - Usage: ld root [<command>] [<jobname>]\n"
+		return
+	elif [ $# -eq 0 ]; then
+		cmd l
+	elif [[ "$*" =~ "root" ]]; then # Root permissions requested
+		shift # Remove 'root' argument
+		sudo zsh -c "$functions[ld]" ld "$@" # Execute zsh as root and import ld function
+	elif [ $# -eq 1 ]; then
+		cmd "$1"
+	elif [ $# -ge 2 ]; then
+		get_job "$2"
+		[ $? -eq 1 ] && return 1
+		cmd "$@"
+	fi
+}

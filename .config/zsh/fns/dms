@@ -1,0 +1,13 @@
+# Start docker machine and auto eval env
+dms() {
+	if [ -z "$1" ]; then
+		print "Start a docker machine and auto eval machine env"
+		print -P "Usage:	  %F{green}dms%f [<machine>]"
+		print " machine  Docker machine name"
+	fi
+	if [[ $# -eq 1 ]]; then
+		docker-machine start "$1"
+		# If docker machine active state is inactive (*) then eval machine env
+		[[ $(docker-machine ls | grep "$1" | awk -F' ' '{print $2}') != "*" ]] && eval $(docker-machine env "$1")
+	fi
+}

@@ -1,0 +1,4 @@
+# Make a directory and cd into it
+mkcd() {
+	[ -n "$1" ] && mkdir -p "$1" && builtin cd "$1"
+}

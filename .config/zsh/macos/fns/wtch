@@ -1,0 +1,16 @@
+# Custom watch implementation
+wtch() {
+	if [[ -z "$1" ]] ; then
+		print "Execute a program periodically, showing output fullscreen."
+		print -P "Usage:   %F{green}wtch%f [<cmd>] [<sleep>]"
+		print " cmd     Command to run. Use quotes for commands with spaces."
+		print " sleep   (Optional) Sleep time in seconds. If no time provided then 1s used."
+	else
+		while true; do
+			clear
+			date
+			zsh -c "$1"
+			sleep ${2:-1}
+		done
+	fi
+}

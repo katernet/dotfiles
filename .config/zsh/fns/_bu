@@ -1,0 +1,9 @@
+#compdef bu
+
+_bu() {
+	_arguments \
+	    {--log,-l}'[Print backup log]' \
+	    {--logclear,-lc}'[Clear backup log]' \
+	    '1: :_files' \
+	    '2: :(--log)'
+}

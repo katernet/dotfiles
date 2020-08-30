@@ -1,0 +1,5 @@
+#compdef fns
+
+_fns() {
+	_arguments {-h,--help}'[Show functions help]'
+}

@@ -1,0 +1,15 @@
+# Search files using fzy and open in editor
+fe() {
+	(($+commands[fzy])) || { echo "Function requires: fzy" >&2 && return 1 }
+	setopt local_options nullglob
+	# Paths to find files
+	local paths=(
+		$XDG_CONFIG_HOME
+		$XDG_DATA_HOME
+		~/Library/Scripts
+	)
+	local RESULT=$(find "${paths[@]}" -type f ! -name "*.zwc" ! -name ".DS_Store" | fzy)
+	[ -z "$RESULT" ] && return
+	BUFFER="$EDITOR $RESULT"
+	builtin zle accept-line
+}

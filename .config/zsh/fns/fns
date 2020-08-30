@@ -1,0 +1,103 @@
+# Print a usage for the functions included with zsh config
+fns() {
+	if [[ "$1" == (--help|-h) ]]; then
+		print "\nUseful functions included with zsh config
+
+Function	Description
+--------	-----------
+d		Show/add to directory stack
+mkcd 		Make a directory and cd into it
+cdl 		Change to a directory and list contents
+fe		Fuzzy search files with fzy and open in editor. Search paths set in the function.
+
+fcd		Fuzzy search zsh-z's known directories using fzy and cd to the directory.
+Usage:		fcd [directory] [l]
+ Options:
+ directory	Directory to search. If the directory exists in PWD, then it is immediately cd'd to.
+ 		If not provided, all zsh-z's known directories are fuzzy searched.
+ l 		(Optional) List the folder contents once cd'd to - 'ls -lah'
+
+bu		Backup a file with a timestamp and create a copy with preserved attributes
+Usage: 		bu [<filename>] [<filename> --log|-l]
+ or		bu [--log|-l|--logclear|-lc]
+Options:
+ filename	Filename to backup
+ --log|-l 	Arg1: Print bu log Arg2: (Optional) Log timestamp and filename to "'$ZDOTDIR'"/.zbulog
+ --logclear|-lc	Clear bu log
+
+(ext)ract	Extract an archive based on the file extension
+Usage: 		(ext)ract [filename]
+Options:
+ filename	Filename of archive. Supported archives: zip,7z,Z,bz2,gz,rar,jar,tar,tarballs
+
+findstr		Find a file containing a string
+Usage: 		findstr [path] [string]
+Options:
+ path		(Optional) Path to search. If no path supplied then current directory is used..
+ string 	String to search. Use quotes for a string with spaces.
+
+fkill		Fuzzy search processes using fzy and kill the process.
+Usage:		fkill [signalno]
+Options:
+ signalno	(Optional) Signal number to kill the process. If not provided then -9 is used.
+
+gacp		Git add file, commit a message and push with one command.
+Usage:		gacp [filename] [message]
+Options:
+ filename	(Optional) Files to add. If not used then all modified files are added % git add -A
+ message	Commit message. Recommended to quote the message.
+
+gcu 		Git undo last commit and return HEAD to previous state
+
+dms		Start a docker machine and auto eval machine env
+Usage:		dms [machine]
+Options:
+ machine	Docker machine name
+
+dmh		Halt (stop) a docker machine and auto remove machine env
+Usage:		dmh [machine]
+Options:
+ machine	Docker machine name
+
+dme		Evaluate a docker machine environment
+Usage:		dme [machine]
+Options:
+ machine	Docker machine name
+
+dmsg		Display a message below the prompt. This is a Zinit builtin function.
+Usage:		dmsg @sleep:[n] [message]
+Options:
+ @sleep		(Optional) wait in background for n seconds before showing the message
+ message	Message text to display
+
+clr		Print a color chart
+Usage:		clr [bg|fg]
+Options:
+ bg		Background color chart
+ fg		Foreground color chart
+
+wth		Show the current weather using wttr.in
+Usage: 		wth [f]
+Options:
+ f		(Optional) forecast
+
+# Keybind functions
+fuzzy_fe()	[Alt+S]	    Run fe fuzzy file edit function 
+fuzzy_cd()	[Alt+Ent]   Run fcd fuzzy cd function
+fuzzy_hist()	[Alt+R]	    Fuzzy search history with fzy and insert into buffer
+list_files()	[Alt+L]	    In an empty buffer list files, else use builtin down-case-word widget.
+show_dirs()	[ALt+D]	    Show dir stack below prompt
+clear_screen()	[Ctrl+L]    Custom builtin clear-screen widget to assist with prompt tasks
+kill_line()	[Ctrl+U]    Custom builtin kill-line widget to assist with prompt tasks
+fancy_ctrl_z()	[Ctrl+Z]    Move current program to background/foreground
+prepend_sudo()	[Ctrl+X]    Prepend sudo to current buffer
+edit_cmdline()	[Ctrl+X,E]  Edit prompt in editor. The preferred editor can be set in VISUAL.
+scroll_pgup()	[Ctrl+K]    Page up half a page and keep scrollback
+
+# Automatic functions
+accept-line()	Custom builtin accept-line widget to assist with prompt tasks
+avenv()		Auto activate/deactivate virtual environment when cd-ing into/out of a virtualenv
+sjob()		Load a silent background job - runs rjob() - Disabled by default
+rjob()		Run on a random schedule between set min and max hrs\n" | less
+	fi
+}

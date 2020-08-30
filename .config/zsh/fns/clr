@@ -1,0 +1,14 @@
+# Color chart
+clr() {
+	if [ -z "$1" ]; then
+		print "Print a color chart"
+		print -P "Usage: %F{green}clr%f [bg|fg]"
+		print " bg    Background color chart"
+		print " fg    Foreground color chart"
+	fi
+	if [ "$1" = "bg" ]; then
+		for i in {0..255}; do printf '\e[48;5;%dm%3d ' $i $i; (((i+3) % 18)) || printf '\e[0m\n'; done
+	elif [ "$1" = "fg" ]; then
+		for i in {0..255}; do printf '\e[38;5;%dm%3d ' $i $i; (((i+3) % 18)) || printf '\e[0m\n'; done
+	fi
+}

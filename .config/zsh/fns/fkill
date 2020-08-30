@@ -1,0 +1,10 @@
+# Fuzzy search processes with fzy and kill the process
+fkill() {
+	local pid
+	if (( $UID != 0 )); then
+		pid=$(ps -f -u $UID | sed 1d | fzy | awk '{print $2}')
+	else
+		pid=$(ps -ef | sed 1d | fzy | awk '{print $2}')
+	fi
+	[ -n "$pid" ] && echo $pid | xargs kill -${1:-9}
+}

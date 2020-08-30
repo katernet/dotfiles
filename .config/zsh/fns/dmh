@@ -1,0 +1,13 @@
+# Halt docker machine and auto remove env
+dmh() {
+	if [ -z "$1" ]; then
+		print "Halt a docker machine and auto remove machine env"
+		print -P "Usage:	  %F{green}dmh%f [<machine>]"
+		print " machine  Docker machine name"
+	fi
+	if [[ $# -eq 1 ]]; then
+		docker-machine stop "$1"
+		# If docker machine active state is active (-) then remove machine env
+		[[ $(docker-machine ls | grep "$1" | awk -F' ' '{print $2}') == "-" ]] && eval $(docker-machine env -u)
+	fi
+}

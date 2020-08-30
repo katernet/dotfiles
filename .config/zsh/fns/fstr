@@ -1,0 +1,14 @@
+# Find files containing a string
+fstr() {
+	if [ -z "$1" ]; then
+		print "Find a file containing a string"
+		print -P "Usage:   %F{green}findstr%f [<path>] [<string>]"
+		print " path    (Optional) Path to search. If no path supplied then current directory is used."
+		print " string  String to search. Use quotes for a string with spaces."
+	fi
+	if [ $# -eq 1 ]; then
+		find . -type f -exec grep -r --exclude={hist\*.zsh,\*.db,.zcompdump\*,\*.zwc,ClipboardHistory.db\*,clipboard.alfdb} "$1" /dev/null {} \; # Current directory
+	elif [ $# -eq 2 ]; then
+		find "$1" -type f -exec grep -r --exclude={hist\*.zsh,\*.db,.zcompdump\*,\*.zwc,ClipboardHistory.db\*,clipboard.alfdb} "$2" /dev/null {} \; # Directory specified in 1st arg
+	fi
+}

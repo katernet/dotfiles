@@ -1,0 +1,4 @@
+# Change to a directory and list contents
+cdl() {
+	builtin cd "$argv[-1]" && ls -al "${(@)argv[1,-2]}"
+}

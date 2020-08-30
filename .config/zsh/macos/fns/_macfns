@@ -1,0 +1,5 @@
+#compdef macfns
+
+_macfns() {
+	_arguments {-h,--help}'[Show macOS functions help]'
+}

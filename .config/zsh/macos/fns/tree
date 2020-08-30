@@ -1,0 +1,4 @@
+# A linux tree alternative for macOS
+tree() {
+	find "${@:-.}" -print | sed -e 's;[^/]*/;|__;g;s;__|; |;g'
+}

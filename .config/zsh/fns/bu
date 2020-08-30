@@ -1,0 +1,29 @@
+# Backup file
+bu() {
+	if [[ -z "$1" ]] ; then
+		print "Backup a file with a timestamp and create a copy with preserved attributes"
+		print -P "Usage: %F{green}bu%f [<filename>] [<filename> --log|-l]"
+		print "	  [--log|-l|--logclear|-lc]"
+		print "filename	Filename to backup"
+		print -- "--log|-l 	Arg1: Print bu log Arg2: Log timestamp and filename to "'$ZDOTDIR'"/.zbulog"
+		print -- "--logclear|-lc	Clear bu log"
+	elif [[ $# -eq 1 ]] && [[ "$1" == "--log" || "$1" == "-l" ]]; then # Print backup file log
+		[ -f $ZDOTDIR/.bulog ] && cat $ZDOTDIR/.bulog || echo "bu: Backup log does not exist! Run a file backup with --log"
+	elif [[ $# -eq 1 ]] && [[ "$1" == "--logclear" || "$1" == "-lc" ]]; then # Clear backup file log
+		echo -n "" > $ZDOTDIR/.bulog
+		echo "bu: Cleared backup log file."
+	else
+		if [ -f "$1" ]; then
+			local timestamp=$(date +%Y%m%d%H%M%S)
+			mv "$1" "$1".bak_"$timestamp" # Backup file with date in filename
+			cp -ip "$1".bak_"$timestamp" "$1" # Copy backup and use original filename
+			if [[ $# -eq 2 ]] && [[ "$2" == "--log" || "$2" == "-l" ]]; then
+				echo "$(date "+%Y-%m-%d %T") bu: $PWD/$1" >> $ZDOTDIR/.bulog
+			fi
+			echo "bu: Backed up file "$1" to "$1".bak_"$timestamp""
+		else
+			echo "bu: File '"$1"' does not exist."
+			return 1
+		fi
+	fi
+}

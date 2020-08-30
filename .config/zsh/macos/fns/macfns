@@ -1,0 +1,56 @@
+# Print a usage for macOS functions included with zsh config
+macfns() {
+	if [[ "$1" == (--help|-h) ]]; then
+		print "\nUseful macOS functions included with zsh config
+
+Function	Description
+--------	-----------
+
+pfd 		Return the current open Finder directory
+cdf		cd to current open Finder directory
+pushdf		Push current open Finder directory to dir stack
+ofd		Open current directory in Finder
+oa		Fuzzy search Applications using fzy and launch
+ql 		Quick Look files
+
+rmdss 		Remove .DS_Store files recursively
+ Usage: 	rmdss [dir]
+ Options:
+  dir 		(Optional) directory to search. If not supplied the current directory is used.
+
+spotify 	An AppleScript to control Spotify. Run with no options to see the usage.
+
+tree		A linux tree alternative for macOS
+ Usage:		tree [directory]
+ Options:
+  directory	(Optional) The directory to search. If supplied used the current directory is used.
+
+ld		A launchd wrapper function for non system launchd jobs
+Usage:		ld [<command>] [<jobname>]
+Options:
+ command
+  l 		Summary of jobs/all jobs with no job name provided
+  d 		List all disabled jobs - used with no job name
+  e 		Edit job plist in EDITOR
+  f 		Get job plist location
+  p 		Print job information about the domain or a specific job
+  load 		Load a job
+  unload	Unload a job
+  reload 	Reload a job
+  kstart 	Kickstart a job - restart job if running
+  kill		Kill a job
+  enable 	Enable a job
+  disable 	Disable a job
+
+ jobname 	Case-insensitive pattern match of job name
+
+ Optional
+  root		Run with root permissions - Usage: ld root [<command>] [<jobname>]
+
+wtch		Custom watch function. Execute a program periodically, showing output fullscreen.
+Usage:		wtch [<command>] [<sleep>]
+Options:
+ command	Command to run. Use quotes for commands with spaces.
+ sleep		(Optional) sleep time in seconds\n" | less
+	fi
+}

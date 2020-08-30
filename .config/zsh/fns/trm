@@ -1,7 +1,7 @@
-# Shrink directory path loaded in fpath
+# Trim prompt directory path
 # Adapted from https://www.zsh.org/mla/workers/2009/msg00415.html
 
-_shrinkpath () {
+trm() {
 	setopt localoptions rc_quotes null_glob
 	unsetopt localoptions case_glob
 

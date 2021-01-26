@@ -10,8 +10,6 @@ export XDG_DATA_HOME=$HOME/.local/share
 export ZDOTDIR=$XDG_CONFIG_HOME/zsh
 
 # Env #
-export EDITOR=micro						# Set text editor
-export GIT_CONFIG=$XDG_CONFIG_HOME/git/config			# Git config path
 export GPG_TTY=$TTY						# Set GnuPG TTY
 export GNUPGHOME=$XDG_CONFIG_HOME/gnupg				# GnuPG config path
 export MACHINE_STORAGE_PATH=$XDG_DATA_HOME/docker-machine	# Docker machine path

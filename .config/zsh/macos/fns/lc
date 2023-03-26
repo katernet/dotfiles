@@ -1,10 +1,9 @@
-# A launchd wrapper function with helper utilities
+# A launchctl wrapper function with helper utilities
 # Adapted from lctl https://github.com/newtonne/lctl
-
-ld() {
+lc() {
 	setopt local_options extendedglob nullglob
 	declare -a jobs_path jobs_plist jobs_file jobs_name jobs_search jobs_exactsearch
-	
+
 	# Setup launchd job paths. If script is run as root, the root Library locations are used.
 	if [[ $UID -ne 0 || -z $SUDO_USER ]]; then
 		jobs_path=(~/Library/LaunchAgents /Library/LaunchAgents)
@@ -81,7 +80,7 @@ ld() {
 			[ "$1" = "l" ]        && launchctl list | grep -E "^PID|${jobs_regex}" | sort -k3,3
 			[ "$1" = "d" ]        && launchctl print-disabled "$domain" | grep -E "${jobs_regex}" | grep "true" | cut -d'"' -f2
 			[ "$1" = "p" ]        && launchctl print "$domain"
-			[[ "$1" != (l|d|p) ]] && { echo "Error: command requires a job name parameter. See ld --help" >&2 && return 1 }
+			[[ "$1" != (l|d|p) ]] && { echo "Error: invalid parameter. See lc --help" >&2 && return 1 }
 		elif [ $# -eq 2 ]; then
 			[ "$1" = "l" ]        && launchctl list "$job_name"
 			[ "$1" = "e" ]        && ${EDITOR:-vim} "$job_plist"
@@ -100,8 +99,8 @@ ld() {
 	
 	# Setup
 	if [[ $1 == "--help" || $1 == "-h" ]]; then
-		print "A launchd wrapper function for non system launchd jobs"
-		print -P "Usage: %F{green}ld%f [<command>] [<jobname>]\n"
+		print "A launchctl wrapper function for non system launchd jobs"
+		print -P "Usage: %F{green}lc%f [<command>] [<jobname>]\n"
 		print "command"
 		print " l 	 Summary of a job/all jobs if no job name provided"
 		print " d 	 List all disabled jobs"
@@ -117,13 +116,13 @@ ld() {
 		print " disable Disable a job\n"
 		print "jobname  Case-insensitive pattern match of job name.\n"
 		print "Optional"
-		print " root 	 Run with root permissions - Usage: ld root [<command>] [<jobname>]\n"
+		print " root 	 Run with root permissions - Usage: lc root [<command>] [<jobname>]\n"
 		return
 	elif [ $# -eq 0 ]; then
 		cmd l
-	elif [[ "$*" =~ "root" ]]; then # Root permissions requested
+	elif [ $1 = "root" ]; then # Root permissions requested
 		shift # Remove 'root' argument
-		sudo zsh -c "$functions[ld]" ld "$@" # Execute zsh as root and import ld function
+		sudo zsh -i -c "$functions[lc]" lc "$@" # Execute zsh as root and import lc function
 	elif [ $# -eq 1 ]; then
 		cmd "$1"
 	elif [ $# -ge 2 ]; then

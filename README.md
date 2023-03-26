@@ -12,19 +12,19 @@ Feel free to use and adapt as needed.
 
 A custom zsh config, including a personalised theme with plugin support and an async git status.
 
-The shell loads in 29 ms (Intel iMac with SSD)
+The shell loads in 29 ms (Intel iMac with SSD).  
 Benchmark results measured using [zsh-bench](https://github.com/romkatv/zsh-bench)
 
-Shell responsiveness is achieved by deferring plugins and lazy loading functions via fpath.
+Shell responsiveness is achieved by deferring plugins and lazy loading functions via fpath.  
 The plugin code is adapted from [zsh_unplugged](https://github.com/mattmc3/zsh_unplugged)
 
-Included plugins:
-romkatv/zsh-defer
-ohmyzsh/git
-laggardkernel/zsh-thefuck
-marzocchi/zsh-notify
-zdharma-continuum/fast-syntax-highlighting
-zsh-users/zsh-autosuggestions
+Included plugins:  
+zsh-defer  
+ohmyzsh git  
+zsh-thefuck  
+zsh-notify  
+fast-syntax-highlighting  
+zsh-autosuggestions
 
 The following prompt features can be enabled in the zshrc. To enable a feature set the variable to 'y' or as described.
 
@@ -33,14 +33,14 @@ The following prompt features can be enabled in the zshrc. To enable a feature s
 | PROMPT_CONTEXT      | y: User@Host u: User o: Other user r: Remote context         |
 | PROMPT_CLOCK        | Prompt clock - y: 24H clock 12: 12H clock                    |
 | PROMPT_HISTLINE     | Prompt history line number                                   |
-| PROMPT_BOLD	      | Bold prompt				                     |
+| PROMPT_BOLD	        | Bold prompt				                                           |
 | PROMPT_PREFIX       | Prompt section prefixes                                      |
-| PROMPT_ICONS        | Prompt glyph icons 			                     |
-| PROMPT_OS	      | Show OS icon - Arch, BSD, Linux, macOS	                     |
-| PROMPT_NEWLINE      | Show a new line after the prompt	                     |
+| PROMPT_ICONS        | Prompt glyph icons 			                                     |
+| PROMPT_OS	          | Show OS icon - Arch, BSD, Linux, macOS	                     |
+| PROMPT_NEWLINE      | Show a new line after the prompt	                           |
 | PROMPT_TRANSIENT    | Transient prompt - Trim previous prompts                     |
 | PROMPT_TRANSIENTOPT | Opts: newline, clock, hist                                   |
-| PROMPT_DIR          | trim: Trim pwd path c: Current dir y: Full path              |
+| PROMPT_DIR          | Dir opts - trim: Trim pwd path c: Current dir y: Full path   |
 | PROMPT_DIRRESUME    | Resume last dir from dirstack at login                       |
 | PROMPT_DIRLOCK      | Prompt dir lock icon for unwriteable folders                 |
 | PROMPT_DIRCOLOR     | Dir color - Use 'default' for stock color                    |
@@ -58,13 +58,13 @@ The following prompt features can be enabled in the zshrc. To enable a feature s
 | PROMPT_MOTDOPT      | Opts: help, (neo/fast)fetch, hostinfo, greeting, quote, todo |
 | PROMPT_BOTTOM       | Set the prompt at the bottom of the Terminal                 |
 | PROMPT_COMPILE      | Compile zsh config files and compdump for fast load          |
-| PROMPT_ZHELP=xman   | Use Apple x-man-page - macOS only	                     |
+| PROMPT_ZHELP=xman   | Use Apple x-man-page - macOS only	                           |
 | RPROMPT_OFF         | Switch off right prompt                                      |
 | RPROMPT_CLOCK       | Right prompt clock                                           |
 | RPROMPT_CMDTIME     | Right prompt command time                                    |
 | RPROMPT_HISTLINE    | Right prompt history line number                             |
-| RPROMPT_DOCKER      | Right prompt docker module	                             |
-| RPROMPT_GITVCS      | Right prompt git vcs module	                             |
+| RPROMPT_DOCKER      | Right prompt docker module	                                 |
+| RPROMPT_GITVCS      | Right prompt git vcs module	                                 |
 | RPROMPT_JOBS        | Right prompt background job status                           |
 | RPROMPT_EXITCODE    | Right prompt exit code                                       |
 | RPROMPT_EXITSIG     | Right prompt exit signal                                     |

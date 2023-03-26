@@ -1,35 +1,38 @@
-# Print a usage for macOS functions included with zsh config
+# Print a help page for macOS functions included with zsh config
 macfns() {
+	[ $# -eq 0 ] && { print -P "Usage: %F{green}$0%f --help" && return }
 	if [[ "$1" == (--help|-h) ]]; then
-		print "\nUseful macOS functions included with zsh config
+		print "
+macOS functions included with zsh config
 
 Function	Description
 --------	-----------
 
-pfd 		Return the current open Finder directory
 cdf		cd to current open Finder directory
 pushdf		Push current open Finder directory to dir stack
 ofd		Open current directory in Finder
-oa		Fuzzy search Applications using fzy and launch
+oa		Fuzzy search Apps using fzf and open. Or use as an alias for 'open -a'.
 ql 		Quick Look files
 
-rmdss 		Remove .DS_Store files recursively
- Usage: 	rmdss [dir]
- Options:
-  dir 		(Optional) directory to search. If not supplied the current directory is used.
+spotify 	An AppleScript to control Spotify
+		Run with no options to see the usage
+		When running for the first time, this script will be pulled from Github.
 
-spotify 	An AppleScript to control Spotify. Run with no options to see the usage.
+rmdss 		Remove .DS_Store files recursively
+ Usage: 	\e[32mrmdss\e[0m [dir]
+ Options:
+  dir 		(Optional) directory to search. If not supplied the current dir is used.
 
 tree		A linux tree alternative for macOS
- Usage:		tree [directory]
+ Usage:		\e[32mtree\e[0m [dir]
  Options:
-  directory	(Optional) The directory to search. If supplied used the current directory is used.
+  dir		(Optional) Directory to search. If not supplied the current dir is used.
 
-ld		A launchd wrapper function for non system launchd jobs
-Usage:		ld [<command>] [<jobname>]
+lc		A launchctl wrapper for non system launchd jobs
+Usage:		\e[32mlc\e[0m [<command>] [<jobname>]
 Options:
  command
-  l 		Summary of jobs/all jobs with no job name provided
+  l 		Summary of job/all jobs with no job name provided
   d 		List all disabled jobs - used with no job name
   e 		Edit job plist in EDITOR
   f 		Get job plist location
@@ -37,7 +40,7 @@ Options:
   load 		Load a job
   unload	Unload a job
   reload 	Reload a job
-  kstart 	Kickstart a job - restart job if running
+  kstart 	Kickstart a job (restarts job if running)
   kill		Kill a job
   enable 	Enable a job
   disable 	Disable a job
@@ -45,12 +48,25 @@ Options:
  jobname 	Case-insensitive pattern match of job name
 
  Optional
-  root		Run with root permissions - Usage: ld root [<command>] [<jobname>]
+  root		Run with root permissions - Usage: lc root [<command>] [<jobname>]
 
 wtch		Custom watch function. Execute a program periodically, showing output fullscreen.
-Usage:		wtch [<command>] [<sleep>]
+Usage:		\e[32mwtch\e[0m [<command>] [<sleep>]
 Options:
  command	Command to run. Use quotes for commands with spaces.
- sleep		(Optional) sleep time in seconds\n" | less
+ sleep		(Optional) sleep time in seconds
+
+xman		Open man pages in Apple x-man-page
+		To enable this option set PROMPT_ZHELP=xman in macos.zsh
+Usage:		\e[32mxman\e[0m [<command>] [<subcommand>]
+Optional	subcommand
+Note		iTerm users - Configure iTerm to open x-man-pages:
+ 		https://gist.github.com/andredsp/ad89adfcbc363adfc645f68fdc8d93ca
+ 		Use the following command for Zsh topic pages to work:
+ 		zsh -c \"echo '\$\$HOST\$\$''\$\$PATH\$\$' | xargs man\"
+
+# Keybind functions
+complete_help() [ESC+H]    Complete help replacement for xman
+" | less -R
 	fi
 }

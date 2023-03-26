@@ -1,0 +1,14 @@
+# Open man page in Apple x-man-page
+xman() {
+	local mancmd
+	[ "$PROMPT_ZHELP" = 'xman' ] && mancmd='open x-man-page://' || mancmd='man '
+	if [ $# -eq 0 ]; then
+		print 'Open man page in Apple x-man-page'
+		print -P 'Usage:   %F{green}xman%f [<command>] [<subcommand>]'
+		print 'Optional <subcommand>'
+	elif [ $# -eq 1 ] ; then
+		eval ${mancmd}$1
+	elif [ $# -eq 2 ] ; then
+		eval ${mancmd}$1/$2
+	fi
+}

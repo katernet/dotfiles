@@ -1,6 +1,5 @@
 # Trim prompt directory path
 # Adapted from https://www.zsh.org/mla/workers/2009/msg00415.html
-
 trm() {
 	setopt localoptions rc_quotes null_glob
 	unsetopt localoptions case_glob
@@ -37,7 +36,7 @@ trm() {
 		until [[ (( ${#expn} == 1 )) || $dir = $expn || $i -gt 99 ]]; do
 			(( i++ ))
 			part+=$dir[$i]
-			expn=($(print ${part}*(-/)))
+			expn=(${part}*(-/))
 		done
 		result+="/$part"
 		cd -q $dir

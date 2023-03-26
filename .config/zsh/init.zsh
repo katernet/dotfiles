@@ -1,111 +1,75 @@
+# Path
+typeset -U path
+export path=(/usr/local/{bin,sbin} $path)
+
+# Env
+export EDITOR=${${commands[micro]:t}:-nano}			# Text editor
+export VISUAL=$EDITOR						# Visual editor
+export GPG_TTY=$TTY						# Set GnuPG TTY
+export GNUPGHOME=$XDG_CONFIG_HOME/gnupg				# GnuPG config path
+export MACHINE_STORAGE_PATH=$XDG_DATA_HOME/docker-machine	# Docker machine path
+export FZF_DEFAULT_OPTS='-1 --reverse --height=11 --no-info'	# Fzf custom options
+[ -f $XDG_CONFIG_HOME/git/config ] && \
+export GIT_CONFIG=$XDG_CONFIG_HOME/git/config			# Git config path
+(($+commands[brew])) && \
+export HOMEBREW_NO_ANALYTICS=1 HOMEBREW_NO_AUTO_UPDATE=1	# Homebrew options
+
 # Vars
-export CLICOLOR=1						# Enable macOS terminal colors
-export LSCOLORS='Gxfxcxdxbxegedabagacad'			# Set BSD ls colors
-typeset -g DEFAULTUSER=${HOME##*/}				# Get logged in user ID
-typeset -g DOCKER_CONFIG=$XDG_CONFIG_HOME/docker 		# Docker config location
+typeset -g DEFAULTUSER=${HOME##*/}                              # Logged in user ID
+typeset -g DOCKER_CONFIG=$XDG_CONFIG_HOME/docker                # Docker config location
 typeset -g DOCKER_CERT_PATH=$XDG_DATA_HOME/docker-machine/certs # Docker cert location
 
 # Opt
-setopt auto_cd auto_pushd pushdignoredups pushdminus pushdsilent no_case_glob hist_ignore_dups \
-	hist_expire_dups_first hist_ignore_space extended_history inc_append_history prompt_subst
-# auto_cd : 		  Change directory without cd
-# auto_pushd : 		  Set cd to push the old directory onto the directory stack
-# pushdignoredups : 	  Don’t push multiple copies of directories onto the directory stack
-# pushdminus : 		  Exchange meanings of + and - with a number in the directory stack
-# pushdsilent: 		  Don't print the directory stack after pushd or popd
-# no_case_glob : 	  Enable case-insensitive globbing
-# hist_ignore_dups : 	  Ignore duplicated commands in history
-# hist_expire_dups_first: Delete duplicates first when HISTFILE size exceeds HISTSIZE
-# hist_ignore_space : 	  Ignore commands that start with space
-# extended_history : 	  Record timestamp of command in history
-# inc_append_history : 	  Add commands to history in order of execution
-# prompt_subst : 	  Allow expansion in prompts
-unsetopt flowcontrol histverify
-# flowcontrol : 	  Output flow control in the shell’s editor
-# histverify :  	  Confirmation in expansion
-# Transient right prompt - Used with transient prompt and without rprompt clock & hist line set
-[[ -n "$PROMPT_TRANSIENT" ]] && [[ -z "$RPROMPT_CLOCK" && -z "$RPROMPT_HISTLINE" ]] && setopt transient_rprompt
+setopt auto_cd cd_silent auto_pushd pushd_silent pushd_ignore_dups prompt_subst \
+	extended_history hist_ignore_dups hist_ignore_all_dups hist_save_no_dups hist_ignore_space
+[ "$PROMPT_TRANSIENT" ] && [[ -z "$RPROMPT_CLOCK" && -z "$RPROMPT_HISTLINE" ]] && setopt transient_rprompt
+unsetopt beep case_glob flow_control
 
 # History
-if [ $UID = 0 ]; then
-	HISTFILE=$XDG_CACHE_HOME/zsh/.zhistory_$USER.zsh # Hist file for root
-	HISTSIZE=1000
-	SAVEHIST=1000
-elif [ -n "$PROMPT_HISTDISABLE" ]; then
-	HISTFILE=/dev/null # Disable history
+HISTSIZE=10000
+SAVEHIST=100000
+if [ $USER != "$DEFAULTUSER" ]; then
+	HISTFILE=$XDG_CACHE_HOME/zsh/zhist_$USER
 else
-	HISTFILE=$XDG_CACHE_HOME/zsh/.zhistory
-	HISTSIZE=50000
-	SAVEHIST=10000
+	HISTFILE=$XDG_CACHE_HOME/zsh/zhist
+	HISTORY_IGNORE='(-|[1-9]|cd|cdf|z|z *|pwd|l|l[dtuR@]|[bf]g|d|e|h|hist|top|fe|fe *|..|...*)'
 fi
-[ -z "$PROMPT_HISTOFF" ] && HISTORY_IGNORE='(-|[1-9]|cd|z *|l|l[dtuR@]|d|e|hist|h|top|se|.|..|...*)' || SAVEHIST=0
-
-# Compinit. Limit dump check to once per day and compile for fast load.
-# Adapted from https://gist.github.com/ctechols/ca1035271ad134841284
-comp() {
-	autoload -Uz compinit
-	setopt local_options extendedglob # Enable extended globbing for this function only
-	local zcd=$XDG_CACHE_HOME/zsh/.zcompdump
-	if [[ $UID = 0 || -n $SUDO_USER ]]; then # Root user
-		compinit -u -d "$zcd"_$USER # -u: Accept insecure directories
-		return
-	fi
-	if [[ -f "$zcd"(#qN.m+1) || ! -f "$zcd" ]]; then # If dump modified >1 day ago or does not exist
-		compinit -d "$zcd"
-		zcompile "$zcd" &! # Compile dump in a background job
-	else
-		compinit -C -d "$zcd" # -C: Ignore checking
-		[[ ! -f "$zcd".zwc || "$zcd" -nt "$zcd".zwc ]] && zcompile "$zcd" &! # If no compiled dump or dump newer than compiled dump
+# Exclude commands not found from history
+zshaddhistory() {
+	if [[ $1 != ${~HISTORY_IGNORE} ]]; then # Reintroduce ignored history
+		whence ${${(z)1}[1]} >| /dev/null || return 1
 	fi
 }
 
-# Zinit
-declare -A ZINIT
-ZINIT[HOME_DIR]=$ZDOTDIR/zinit
-ZINIT[PLUGINS_DIR]=$ZDOTDIR/zinit/plugins
-ZINIT[COMPLETIONS_DIR]=$ZDOTDIR/zinit/completions
-if [ -d ${ZINIT[HOME_DIR]} ]; then
-	source ${ZINIT[HOME_DIR]}/zinit.zsh
-else # Install Zinit
-	typeset -g nomotd=y
-	print -P "%F{214}▓▒░ %F{220}Installing Zinit plugin manager…%f"
-	(($+commands[git])) || { print -P "%F{214}▓▒░ %F{9}Error: Git is required to install Zinit!%F"; return 1 } # Git not intalled
-	command git clone https://github.com/zdharma/zinit.git $ZDOTDIR/zinit && \
-		print -P "%F{214}▓▒░ %F{green}Installation successful.%F" || \
-			print -P "%F{214}▓▒░ %F{9}Error: The clone has failed!%F"
-	source $ZDOTDIR/zinit/zinit.zsh
+# Functions
+fpath=($ZDOTDIR/fns $fpath)
+autoload -Uz $ZDOTDIR/fns/*(.:t) # Load all functions
+if [[ "$OSTYPE" = darwin* ]]; then # Mac fns
+	fpath=($ZDOTDIR/macos/fns $fpath)
+	autoload -Uz $ZDOTDIR/macos/fns/*(.:t)
 fi
 
-# Load plugins with Zinit
-zinit wait silent light-mode for \
-	katernet/git-prompt \
-	agkozak/zsh-z \
-	atload'zstyle ":notify:*" error-title "zsh: Job failed (#{time_elapsed})"
-	zstyle ":notify:*" success-title "zsh: Job finished (#{time_elapsed})"
-		zstyle ":notify:*" activate-terminal yes' \
-		marzocchi/zsh-notify \
-	atinit'comp; zicdreplay' \
-		zdharma/fast-syntax-highlighting \
-	nocd atload'_zsh_autosuggest_start' \
-		zsh-users/zsh-autosuggestions
-if (($+commands[svn])); then
-	zinit ice svn wait=1 silent light-mode; zinit snippet OMZ::plugins/git
-else
-	print -P "%F{cyan}▓▒░ %F{9}Error: SVN is required to install git plugin!%F"
+# Dirstack
+DIRSTACKSIZE=21
+DIRSTACKFILE=$XDG_CACHE_HOME/zsh/zdirs
+if [[ -f "$DIRSTACKFILE" && $#dirstack -eq 0 ]]; then
+	dirstack=(${(f)"$(<$DIRSTACKFILE)"}) # f - split at new lines
+	[[ "$PROMPT_DIRRESUME" && $dirstack[1] ]] && popd 2> /dev/null # Go to first dir in stack on login
+fi
+chpwd() { # Add to dir stack on dir change
+	print -l $PWD ${(u)dirstack} > "$DIRSTACKFILE"
+}
+
+# Zsh run-help
+if ((!${+functions[run-help]})); then
+	[ -d /usr/share/zsh/help ] 	 && HELPDIR=/usr/share/zsh/help
+	[ -d /usr/local/share/zsh/help ] && HELPDIR=/usr/local/share/zsh/help
+	autoload -Uz run-help
+	((${+aliases[run-help]})) && unalias run-help # https://wiki.archlinux.org/title/Zsh#Help_command
 fi
 
-# Load thefuck
-if (($+commands[thefuck])); then
-	fuck() {
-		eval $(thefuck --alias) && fuck
-	}
-fi
-
-# Add python auto venv to chpwd
-[ -n "$PROMPT_VENV" ] && chpwd_functions+=(avenv)
-
-# Syntax highlighting
-(( ${+FAST_HIGHLIGHT_STYLES} )) || typeset -A FAST_HIGHLIGHT_STYLES # Set styles associative array
+# Syntax highlight opt
+(( ${+FAST_HIGHLIGHT_STYLES} )) || typeset -A FAST_HIGHLIGHT_STYLES
 FAST_HIGHLIGHT_STYLES[alias]=fg=magenta
 FAST_HIGHLIGHT_STYLES[globbing]=fg=99 		# SlateBlue1
 FAST_HIGHLIGHT_STYLES[history-expansion]=fg=99
@@ -116,11 +80,10 @@ FAST_HIGHLIGHT_STYLES[single-hyphen-option]=none
 FAST_HIGHLIGHT_STYLES[double-hyphen-option]=none
 FAST_HIGHLIGHT_STYLES[whatis_chroma_type]=0
 
-# zsh-autosuggestions
-ZSH_AUTOSUGGEST_USE_ASYNC=1 		# Async suggestions
-ZSH_AUTOSUGGEST_MANUAL_REBIND=1	# Disable auto widget re-binding on each precmd
+# Autosuggest opt
+ZSH_AUTOSUGGEST_USE_ASYNC=1 	# Async suggestions
+ZSH_AUTOSUGGEST_MANUAL_REBIND=1	# Disable auto widget rebind
 ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(
-	show_dirs
 	accept-line
 	bracketed-paste
 	copy-earlier-word
@@ -137,6 +100,6 @@ ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(
 	down-line-or-history
 )
 
-# zsh-z
-ZSHZ_OWNER=$DEFAULTUSER # Use zsh-z with sudo
-ZSHZ_DATA=$ZDOTDIR/.z
+# Cache
+[ ! -d $XDG_CACHE_HOME/zsh ] && mkdir $XDG_CACHE_HOME/zsh
+FAST_WORK_DIR=$XDG_CACHE_HOME/zsh # Fast syntax highlight

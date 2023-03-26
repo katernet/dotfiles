@@ -1,31 +1,42 @@
 # Opt
-setopt always_to_end auto_menu complete_in_word globdots
-# always_to_end :    Cursor placed at end after completion
-# auto_menu : 	     Show completion menu on successive tab press
-# complete_in_word : Allow completion from within a word/phrase
-# globdots :  	     Dotfiles are matched in completions without specifying the dot
-unsetopt list_beep # Turn off completion list beeps
+setopt always_to_end auto_menu complete_in_word glob_dots
 
-# Load functions
-autoload -Uz bracketed-paste-magic url-quote-magic
+# Function load
+autoload -Uz compinit bracketed-paste-magic url-quote-magic
+
+# Compinit
+# Limit comp check to once per day
+local zcd check
+zcd=$XDG_CACHE_HOME/zsh/zcompdump
+# Check date modified time of dump
+for i in "$zcd"(N.mh+24); do # Modified over 24 hrs ago
+	check='y'
+	touch "$zcd"
+done
+# Call compinit
+# -C : Skip check for new comps
+[ $check ] && compinit -d "$zcd" || compinit -C -d "$zcd"
 
 # Menu
-zstyle ':completion:*' menu select
+zstyle ':completion:*' menu yes select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
-# Lists
-zstyle ':completion:*' list-prompt   ''
-zstyle ':completion:*' select-prompt ''
+zstyle ':completion:*' list-prompt '%SAt %p: Hit TAB for more, or the character to insert%s'
+zstyle ':completion:*' select-prompt '%SScrolling active: current selection at %p%s'
 # Directories
 zstyle ':completion:*' special-dirs true
-zstyle ':completion:*' list-colors 'di=1;36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43'
-zstyle ':completion:*:cd:*' tag-order local-directories directory-stack path-directories
+[[ "$OSTYPE" = darwin* ]] && zstyle ':completion:*' list-colors 'di=1;34:ln=1;36:so=1;31:pi=1;33:ex=1;32:bd=1;34;46:cd=1;34;43:su=0;41:sg=0;46:tw=0;42:ow=0;43' \
+	|| { eval "$(dircolors -b)" && zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}" }
+zstyle ':completion:*:cd:*' tag-order local-directories directory-stack path-directorie
 zstyle ':completion:*:cd:*:directory-stack' menu yes select
 # Processes
-zstyle ':completion:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
 zstyle ':completion:*:processes' command "ps -u $USER -o pid,user,comm -w -w"
+zstyle ':completion:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
 # Cache
-zstyle ':completion::complete:*' use-cache 1
-zstyle ':completion::complete:*' cache-path $XDG_CACHE_HOME/zstylecache
+zstyle ':completion:*' use-cache 1
+zstyle ':completion:*' cache-path $XDG_CACHE_HOME/zsh/zcompcache
+# Speed up pasting w/ autosuggest - https://github.com/zsh-users/zsh-autosuggestions/issues/238
+zstyle ':bracketed-paste-magic' active-widgets '.self-*'
+zstyle ':bracketed-paste-magic' paste-init pasteinit
 
 # Bracketed paste magic
 zle -N bracketed-paste bracketed-paste-magic
@@ -34,14 +45,5 @@ zle -N bracketed-paste bracketed-paste-magic
 zmodload zsh/complist
 bindkey -M menuselect '^M' .accept-line
 
-# Speed up pasting w/ autosuggest - https://github.com/zsh-users/zsh-autosuggestions/issues/238
-pasteinit() {
-  OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}
-  zle -N self-insert url-quote-magic
-  typeset -g paste=true # Set paste for prompt sched
-}
-pastefinish() {
-  zle -N self-insert $OLD_SELF_INSERT
-}
-zstyle :bracketed-paste-magic paste-init pasteinit
-zstyle :bracketed-paste-magic paste-finish pastefinish
+# Set paste for prompt sched
+pasteinit() { typeset -g paste=true }

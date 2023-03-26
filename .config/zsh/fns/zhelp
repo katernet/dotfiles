@@ -1,0 +1,14 @@
+# Open a Zsh help page
+zhelp() {
+	if [[ $1 = (--help|-h) ]]; then
+		print 'Open a Zsh help page'
+		print 'If a Zsh topic is not found, use the builtin shell manual.'
+		print 'If no topic is provided, the builtin run-help function is used.'
+		print -P "Usage:   %F{green}zhelp%f [<topic>]"
+		print ' topic   Topic to search in Zsh help pages'
+	elif [ $# -eq 0 ]; then
+		run-help
+	elif [ $# -eq 1 ]; then
+		[ -f $HELPDIR/"$1" ] && run-help "$1" || eval man "$1"
+	fi
+}

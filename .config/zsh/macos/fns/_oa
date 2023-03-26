@@ -1,0 +1,4 @@
+#compdef oa
+_oa() {
+	_arguments {-h,--help}'[Show oa help]'
+}

@@ -1,103 +1,141 @@
-# Print a usage for the functions included with zsh config
+# Print a help page for the functions included with zsh config
 fns() {
+	[ $# -eq 0 ] && { print -P "Usage: %F{green}$0%f --help" && return }
 	if [[ "$1" == (--help|-h) ]]; then
-		print "\nUseful functions included with zsh config
+		print "
+Functions included with zsh config
 
 Function	Description
 --------	-----------
-d		Show/add to directory stack
-mkcd 		Make a directory and cd into it
-cdl 		Change to a directory and list contents
-fe		Fuzzy search files with fzy and open in editor. Search paths set in the function.
+d		Show first 10 directories in dirstack/add to dirstack
+cdl		Change to a directory and list contents
+mkcd		Make a directory and cd into it
 
-fcd		Fuzzy search zsh-z's known directories using fzy and cd to the directory.
-Usage:		fcd [directory] [l]
- Options:
- directory	Directory to search. If the directory exists in PWD, then it is immediately cd'd to.
- 		If not provided, all zsh-z's known directories are fuzzy searched.
- l 		(Optional) List the folder contents once cd'd to - 'ls -lah'
+fe		Fuzzy search files with fzf and open in editor
+Usage:		\e[32mfe\e[0m [<file>]
+ Optional
+ file 		File to search
+ root		Run with root permissions - Usage: fe root [<file>]
+
+fd		Fuzzy search the directory stack with fzf and cd to the directory
+Usage:		\e[32mfd\e[0m [<dir>] [l]
+Options:
+ dir 		(Optional) Directory to search. If the dir exists in PWD, then immediately cd to it.
+ 		Else, the directory stack is searched.
+ l 		(Optional) List the folder contents once cd'd into
+
+fh		Fuzzy search named directories with fzf and cd to the directory
+Usage:		\e[32mfh\e[0m [<nameddir>]
+Options:
+ nameddir	(Optional) Named directory to search. Else, the named directory stack is searched.
 
 bu		Backup a file with a timestamp and create a copy with preserved attributes
-Usage: 		bu [<filename>] [<filename> --log|-l]
- or		bu [--log|-l|--logclear|-lc]
+Usage: 		\e[32mbu\e[0m [<filename>] [--log|-l]
+ or		\e[32mbu\e[0m [--log|-l|--logclr|-lc]
 Options:
  filename	Filename to backup
- --log|-l 	Arg1: Print bu log Arg2: (Optional) Log timestamp and filename to "'$ZDOTDIR'"/.zbulog
- --logclear|-lc	Clear bu log
+ --log|-l 	Arg1: Print bu log Arg2: Log timestamp & filename to "'$ZDOTDIR'"/.zbulog
+ --logclr	Clear bu log
 
-(ext)ract	Extract an archive based on the file extension
-Usage: 		(ext)ract [filename]
+(ext)ract	Extract an archive
+		Supported archives: zip,7z,Z,bz2,gz,rar,jar,tar,tarballs,cab,lzma,xz
+Usage: 		\e[32m(ext)ract\e[0m [<files>]
 Options:
- filename	Filename of archive. Supported archives: zip,7z,Z,bz2,gz,rar,jar,tar,tarballs
+ files		Filename of archives
 
-findstr		Find a file containing a string
-Usage: 		findstr [path] [string]
+fstr		Find files containing a string
+Usage: 		\e[32mfstr\e[0m [<path>] [<string>]
 Options:
- path		(Optional) Path to search. If no path supplied then current directory is used..
+ path		(Optional) Path to search. If no path supplied then current dir is used.
  string 	String to search. Use quotes for a string with spaces.
 
-fkill		Fuzzy search processes using fzy and kill the process.
-Usage:		fkill [signalno]
+fkill		Fuzzy search processes and kill the process
+Usage:		\e[32mfkill\e[0m [<process>] [<signal>]
 Options:
- signalno	(Optional) Signal number to kill the process. If not provided then -9 is used.
+ process	(Optional) Include a process name in the fuzzy search query.
+ signal		(Optional) Signal to kill process. If not provided, signal 1 is used.
 
+hist 		History function. Print all shell history or disable/enable history for session.
+Usage:		\e[32mhist\e[0m [off|on]
+ Options:	
+ off/on		(Optional) [off]: Disable history [on]: Enable history
+ Alias: 	incognito - Toggle on and off
+ 		ghost     - incognito with a ghost icon in place of the prompt
+ -q		Hide the incognito status text
+ 
+take		Make a directory or clone a git repo and cd into it.
+Usage:		\e[32mtake\e[0m [<foldername>] OR [<repoURL>]
+  
 gacp		Git add file, commit a message and push with one command.
-Usage:		gacp [filename] [message]
+Usage:		\e[32mgacp\e[0m [<file>] [\"message\"]
 Options:
- filename	(Optional) Files to add. If not used then all modified files are added % git add -A
+ file		(Optional) Files to add. If not used then all modified files - git add -A
  message	Commit message. Recommended to quote the message.
 
 gcu 		Git undo last commit and return HEAD to previous state
 
 dms		Start a docker machine and auto eval machine env
-Usage:		dms [machine]
+Usage:		\e[32mdms\e[0m [<machine>]
 Options:
  machine	Docker machine name
 
 dmh		Halt (stop) a docker machine and auto remove machine env
-Usage:		dmh [machine]
+Usage:		\e[32mdmh\e[0m [<machine>]
 Options:
  machine	Docker machine name
 
 dme		Evaluate a docker machine environment
-Usage:		dme [machine]
+Usage:		\e[32mdme\e[0m [<machine>]
 Options:
  machine	Docker machine name
 
-dmsg		Display a message below the prompt. This is a Zinit builtin function.
-Usage:		dmsg @sleep:[n] [message]
+dmsg		Display a message below the prompt
+Usage:		\e[32mdmsg\e[0m [@sleep:n] [\"message\"]
 Options:
- @sleep		(Optional) wait in background for n seconds before showing the message
- message	Message text to display
+ message	Message text to display. Quote a message with spaces.
+ @sleep		(Optional) Wait for 'n' seconds before showing the message
 
 clr		Print a color chart
-Usage:		clr [bg|fg]
+Usage:		\e[32mclr\e[0m [bg|fg]
 Options:
  bg		Background color chart
  fg		Foreground color chart
 
+sjob		Run a silent background job
+Usage		\e[32msjob\e[0m [cmd]
+Options
+ cmd		Command to run. Quote if contains spaces.
+
 wth		Show the current weather using wttr.in
-Usage: 		wth [f]
+Usage: 		\e[32mwth\e[0m [f]
 Options:
  f		(Optional) forecast
 
+zhelp		Open a Zsh help page
+		If a Zsh topic is not found, find the command in the builtin man.
+		If no topic is provided, the builtin run-help function is run.
+Usage:   	\e[32mzhelp\e[0m [<topic>]
+ topic     	Topic to search in Zsh help pages
+Note		Mac users: To view in Apple x-man-page set PROMPT_ZHELP=xman in macos.zsh
+
+motd		Print the message of the day
+
 # Keybind functions
-fuzzy_fe()	[Alt+S]	    Run fe fuzzy file edit function 
-fuzzy_cd()	[Alt+Ent]   Run fcd fuzzy cd function
-fuzzy_hist()	[Alt+R]	    Fuzzy search history with fzy and insert into buffer
-list_files()	[Alt+L]	    In an empty buffer list files, else use builtin down-case-word widget.
-show_dirs()	[ALt+D]	    Show dir stack below prompt
 clear_screen()	[Ctrl+L]    Custom builtin clear-screen widget to assist with prompt tasks
-kill_line()	[Ctrl+U]    Custom builtin kill-line widget to assist with prompt tasks
+edit_cmdline()	[Ctrl+X,E]  Edit prompt in text editor
 fancy_ctrl_z()	[Ctrl+Z]    Move current program to background/foreground
+fuzzy_cd()	[Alt+Enter] Run fd fuzzy cd function
+fuzzy_fe()	[Alt+S]	    Run fe fuzzy file edit function 
+fuzzy_hist()	[Alt+R]	    Fuzzy search history with fzy and insert into buffer
+kill_line()	[Ctrl+U]    Custom builtin kill-line widget to assist with prompt tasks
+list_files()	[Alt+L]	    In an empty buffer list files, else use builtin down-case-word widget.
 prepend_sudo()	[Ctrl+X]    Prepend sudo to current buffer
-edit_cmdline()	[Ctrl+X,E]  Edit prompt in editor. The preferred editor can be set in VISUAL.
 scroll_pgup()	[Ctrl+K]    Page up half a page and keep scrollback
+show_dirs()	[Alt+D]	    Show dir stack below prompt
 
 # Automatic functions
 accept-line()	Custom builtin accept-line widget to assist with prompt tasks
-avenv()		Auto activate/deactivate virtual environment when cd-ing into/out of a virtualenv
-sjob()		Load a silent background job - runs rjob() - Disabled by default
-rjob()		Run on a random schedule between set min and max hrs\n" | less
+avenv()		Auto activate/deactivate python virtual environment
+" | less -R
 	fi
 }

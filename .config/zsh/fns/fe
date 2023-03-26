@@ -1,15 +1,27 @@
-# Search files using fzy and open in editor
+# Fuzzy search files and open in editor
 fe() {
-	(($+commands[fzy])) || { echo "Function requires: fzy" >&2 && return 1 }
-	setopt local_options nullglob
-	# Paths to find files
-	local paths=(
-		$XDG_CONFIG_HOME
-		$XDG_DATA_HOME
-		~/Library/Scripts
-	)
-	local RESULT=$(find "${paths[@]}" -type f ! -name "*.zwc" ! -name ".DS_Store" | fzy)
-	[ -z "$RESULT" ] && return
-	BUFFER="$EDITOR $RESULT"
-	builtin zle accept-line
+	(($+commands[fzf])) || { print "Function requires: fzf" >&2 && return 1 }
+	if [ "$1" = 'root' ]; then # Run as root
+		shift
+		sudo zsh -i -c "$functions[fe]" fe "$@" # Import fe function as root
+	else
+		setopt local_options nullglob
+		local paths result
+		# Paths to find files
+		paths=(	
+			$XDG_CONFIG_HOME
+			$XDG_DATA_HOME
+			~/Desktop
+			~/Documents
+			~/Library/Scripts
+			/Library/Scripts
+		)
+		if [ $# -eq 1 ]; then # Fuzzy search arg provided
+			result=$(find "${paths[@]}" -type f ! -name "*.zwc" ! -name ".DS_Store" 2> /dev/null | fzf -q "$1")
+		else
+			result=$(find "${paths[@]}" -type f ! -name "*.zwc" ! -name ".DS_Store" 2> /dev/null | fzf)
+		fi
+		[ -z "$result" ] && return
+		[ -z "$ZLE_STATE" ] && $EDITOR $result || return # Used as function not keybind
+	fi
 }

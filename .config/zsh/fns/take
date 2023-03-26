@@ -1,0 +1,9 @@
+# Make a directory or clone a git repo and cd to it - Adapted from an ohmyzsh function
+take() {
+	if [[ $1 =~ ^([A-Za-z0-9]\+@|https?|git|ssh|ftps?|rsync).*\.git/?$ ]]; then
+		git clone "$1"
+		cd "$(basename ${1%%.git})"
+	else
+		mkdir -p $@ && builtin cd ${@:$#}
+	fi
+}

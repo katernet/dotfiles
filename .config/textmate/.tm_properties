@@ -1,28 +1,14 @@
-# Version 1.0 -- Generated content!
-fontSize         = 11
-softTabs         = false
-softWrap         = false
-tabSize          = 3
+fontName	= 'Menlo'
+fontSize 	= 12
+theme		= '2C24E84F-F9FE-4C2E-92D2-F52198BA7E41'
 
-include = "{$include,.*}"
-exclude = "{$exclude,.DS_Store,.git*}"
-
-[ * ]
-disableExtendedAttributes = true
-
-[ .* ]
-disableExtendedAttributes = true
+exclude  	= "{.DS_Store,*.zwc}"
 
 [ *.sh ]
-filetype         = source.shell
+filetype	= source.shell
 
 [ *.zsh ]
-fileType         = source.shell
-
-[ source ]
-softTabs         = false
-softWrap         = false
+fileType	= source.shell
 
 [ source.shell ]
-softTabs         = false
-softWrap         = false
+tabSize		= 8

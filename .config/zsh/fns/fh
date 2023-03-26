@@ -1,0 +1,30 @@
+# Fuzzy search named directories
+fh() {
+	# Named dir arg from completion
+	if [[ "$1" =~ ~ ]]; then
+		builtin cd "$1"
+		return
+	fi
+	local i j n dir
+	local -a names paths npths stack result
+	(($+commands[fzf])) || { print "$0: Function requires fzf" >&2 && return 1 }
+	names=( ${(D)nameddirs[@]} ) # Named dirs names
+	paths=( ${nameddirs[@]} )    # Named dirs paths
+	npths=( ${names:^paths} )    # Names and paths
+	# Build an array with names and paths columns
+	n=$((${#npths}/2)) # Half of array length
+	i=1
+	for (( j=1; j<=$n; j++)); do
+		stack+=("$npths[$i]	$npths[((i+=1))]")
+		((i++))
+	done
+	if (( $# == 1 )); then
+		result=( $(print -l $stack | fzf -0 -q "$1") )  # Search arg in fzf - exit if no result
+	else
+		result=( $(print -l $stack | fzf) ) 		# Search stack in fzf
+	fi
+	(( ${#result[1]} == 0 )) && return 1 # No results returned from fzf
+	dir=$( print "${result% *}" ) 	# Return only the named directory
+	builtin cd ${~dir} 		# Dir expansion
+	return $?
+}

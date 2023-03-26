@@ -1,9 +1,51 @@
-# Fuzzy search Applications using fzy and launch
-oa () {
-	(($+commands[fzy])) || { echo "Function requires: fzy" >&2 && return 1 }
-	setopt local_options nullglob
-	local paths=(~/Applications/*(^D) /Applications/*(^D))
-	local RESULT=$(find "${paths[@]}" -maxdepth 1 -type d -name "*.app" | fzy)
-	[ -z "$RESULT" ] && return
-	open -a "$RESULT"
+# Fuzzy search for and open applications using fzf
+# A wrapper for open -a with wildcard matching via mdfind
+oa(){
+	if [[ $1 == (--help|-h) ]]; then
+		print "Fuzzy search for and open applications using fzf."
+		print "Use wildcard matching via Spotlight to find an application and launch."
+		print "If no app name is provided, search all applications using fzf."
+		print -P "Usage:	%F{green}oa%f [<app>]"
+		print " app	App name (optional)"
+		return
+	fi
+	local app query
+	local apps=()
+	local paths=(
+		~/Applications
+		/Applications
+	)
+	(($+commands[fzf])) || { print "fcd: Function requires fzf" >&2 && return 1 }
+	# App find function. Loop over each app path and query using mdfind (Spotlight)
+	# mdfind parameters: Only in specified path, matches name case-insensitively, item is only an application.
+	# Results then pruned of basename and sorted alphabetically
+	findApps() {
+		for p in "${paths[@]}"; do
+			mdfind -onlyin "$p" "kMDItemFSName == '${query}*'cdw && \
+				kMDItemKind == 'Application'" -0 | xargs -0 basename | sort
+		done
+	}
+	# Use first arg as search query, else use wildcard for all apps.
+	[ $# -eq 1 ] && query="$1" || query="*"
+	# Collect find results in apps array
+	while read -r line; do
+		apps+=("$line")
+	done < <(findApps)
+	if [ $# -eq 1 ]; then # Query argument used
+		if [ ${#apps[@]} -eq 0 ]; then # No results found
+			print "oa: Unable to find application named '$query'" >&2
+			return 1
+		elif [ ${#apps[@]} -eq 1 ]; then # One result - launch app
+			open -a "${apps[1]}"
+		else # Many results - print results in fzf and launch app choice
+			app=( $(print -l "${apps[@]}" | fzf -q "$1") )
+			(( ${#app[1]} == 0 )) && return
+			open -a "$app"
+		fi
+	else # All apps - print results in fzf and launch app choice
+		app=( $(print -l "${apps[@]}" | fzf) )
+		(( ${#app[1]} == 0 )) && return
+		open -a "$app"
+	fi
+	return $?
 }

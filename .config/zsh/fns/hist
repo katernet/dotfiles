@@ -1,0 +1,31 @@
+# Print all shell history or disable history.
+hist() {
+	if [ $# -eq 0 ]; then # Print history
+		builtin fc -li 1 | less +G
+	elif [[ $1 = 'off' || $1 = 'incognito' || $1 = 'ghost' ]] && [ -z "$incognito" ]; then # Disable history
+		# Save hist parameters
+		HISTFILEBAK=$HISTFILE
+		SAVEHISTBAK=$SAVEHIST
+		unset HISTFILE # Disable hist file
+		if [[ $1 = 'incognito' || $1 = 'ghost' ]]; then
+			typeset -g incognito='y'
+			[ $1 = 'ghost' ] && typeset -g ghostmode='y'
+			[[ "$2" = '-q' || "$3" = '-q' ]] && : || print "${ghosticon}\e[37mIncognito mode on\e[0m"
+		else
+			print "\e[91mHistory disabled!\e[0m"
+		fi	
+	elif [ $1 = "on" ] || [ "$incognito" ]; then # Enable history
+		# Clear new history and reload hist file
+		history -p
+		[ "$HISTFILEBAK" ] && HISTFILE=$HISTFILEBAK
+		[ "$SAVEHISTBAK" ] && SAVEHIST=$SAVEHISTBAK
+		builtin fc -R
+		if [ "$incognito" ]; then
+			unset incognito
+			[ "$ghostmode" ] && unset ghostmode
+			[ "$2" = '-q' ] && : || print "\e[32mIncognito mode off\e[0m"
+		else
+			print "\e[32mHistory enabled\e[0m"
+		fi
+	fi
+}

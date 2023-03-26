@@ -1,15 +1,7 @@
-# Run job silently in the background. 
-# Runs only in an interactive shell and in the first TTY.
-
-return # Function disabled
-
+# Run a job silently in the background
 sjob() {
-	if [ -n "$PROMPT_RJOB" ]; then
-		[ $UID -eq 0 ] && return # No silent job for root user
-		[[ -o interactive ]] || return
-		[ ${TTY: -1} -gt 0 ] && return
-		setopt local_options no_monitor # Prevent job status for this function only
-		rjob &! # Run a disowned background job
-		typeset -g jpid=$! # Store job PID
-	fi
+	[[ -o interactive ]] || return  # Interactive shell only
+	setopt local_options no_monitor # Prevent job status for this function only
+	eval "$@" > /dev/null  &!	# Run argument in a disowned background job
+	typeset -g sjpid=$! 		# Store job PID
 }

@@ -1,4 +1,4 @@
 # Show/add to directory stack
-
-[ -n "$1" ] &&	dirs "$@" || dirs -v | head -10
-compdef _dirs d
+d() {
+	[ -n "$1" ] &&	dirs "$@" || dirs -v | head -10
+}

@@ -1,5 +1,5 @@
 # Local weather
 wth() {
-	[ -z "$1" ] && curl -s wttr.in | sed -n 1,7p
-	[ "$1" = "f" ] && curl -s wttr.in | sed -n 8,37p
+	[ -z "$1" ] && curl -s wttr.in | sed -n 1,7p || :
+	[ "$1" = "f" ] && curl -s wttr.in | sed -n 8,37p || :
 }

@@ -1,0 +1,33 @@
+#compdef fd
+# Adapted from Zsh _cd and _directory_stack
+
+# Directory completion
+_wanted directories expl directory _path_files -/ # Directories in PWD
+
+# Dirstack completion
+local expl ret=1
+local -a list lines revlines
+
+[[ $PREFIX = [-+]* ]] || return
+
+lines=( "${(D)dirstack[@]}" ) # D - directory expansion flag
+
+if [[ ( $PREFIX[1] = - && ! -o pushdminus ) ||
+	( $PREFIX[1] = + && -o pushdminus ) ]]; then
+	integer i
+	revlines=( $lines )
+	for (( i = 1; i <= $#lines; i++ )); do
+		lines[$i]="$((i-1))       ${revlines[-$i]##[0-9]}"
+	done
+else
+	for (( i = 1; i <= $#lines; i++ )); do
+		lines[$i]="$i       ${lines[$i]##[0-9]}"
+	done
+fi
+
+list=( ${PREFIX[1]}${^lines%% *} )
+
+_wanted -V directory-stack expl 'directory stack' \
+	compadd "$@" -ld lines -Q -a list && ret=0
+
+return ret

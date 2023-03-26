@@ -1,0 +1,12 @@
+#compdef fh
+# Adapted from Zsh _hash
+
+local expl ret=1
+local -a names
+
+names=( "${(D)nameddirs[@]}" ) # D - directory expansion flag
+
+_wanted -C name named-directories expl 'named directory' \
+	compadd -ld names -Q -a names && ret=0
+
+return ret

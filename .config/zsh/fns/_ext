@@ -1,0 +1,3 @@
+#compdef ext
+
+_path_files -g '*.(bz2|cab|gz|jar|lzma|rar|tar|tar|tbz|tbz2|tgz|z|zip|7z)'

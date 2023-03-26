@@ -1,0 +1,2 @@
+#compdef take
+_directories "$@"

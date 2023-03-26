@@ -1,10 +1,20 @@
-# Fuzzy search processes with fzy and kill the process
+# Fuzzy search processes and kill the process
 fkill() {
-	local pid
-	if (( $UID != 0 )); then
-		pid=$(ps -f -u $UID | sed 1d | fzy | awk '{print $2}')
-	else
-		pid=$(ps -ef | sed 1d | fzy | awk '{print $2}')
+	(($+commands[fzf])) || { echo "Function requires: fzf" >&2 && return 1 }
+	local pid flags
+	(( $UID != 0 )) && flags=(-f -u $UID) || flags=(-Af) # ps flags for user type
+	if [[ $1 =~ "-h|--help" ]]; then
+		print "Fuzzy search processes and kill the process"
+		print -P "Usage:     %F{green}fkill%f [<process>] [<signal>]"
+		print " process   (Optional) Include a process name in the fuzzy search query."
+		print " signal    (Optional) Signal to kill process. If not provided, signal 1 is used."
+	elif [[ $# -eq 0 ]] || [[ $# -eq 1 && $1 == [0-9] ]]; then
+		pid=$(ps "${flags[@]}" | sed 1d | awk '{print $2"\t"$8}' | fzf | awk '{print $1}')
+		[ -n "$pid" ] && builtin print $pid | xargs kill -${1:-9}
+		return
+	elif [[ $# -ge 1 && $# -le 2 ]] || [[ $# -eq 2 && $2 == [0-9] ]]; then
+		pid=$(ps "${flags[@]}" | sed 1d | awk '{print $2"\t"$8}' | fzf -q "$1" | awk '{print $1}')
+		[ -n "$pid" ] && builtin print $pid | xargs kill -${2:-9}
+		return
 	fi
-	[ -n "$pid" ] && echo $pid | xargs kill -${1:-9}
 }

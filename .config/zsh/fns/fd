@@ -1,38 +1,22 @@
-# cd to zsh-z known directories using fzf
-# Adapted from https://unhexium.net/linux/nobody-uses-cd-anymore
-fcd() {
-	(($+commands[fzy]))   || { echo "Function requires: fzy"   >&2 && return 1 }
-	type zshz > /dev/null || { echo "Function requires: zsh-z" >&2 && return 1 }
-	if [[ -d $1 ]]; then # Folder argument provided exists in PWD
-		builtin cd "$@"
-	else
-		local tac
-		local -a locations
-		[[ "$OSTYPE" == darwin* ]] && tac='tail -r' || tac='tac' # Setup reverse sort command
-		if [[ -n $1 ]]; then # Folder argument provided
-			locations+=( "${(@f)$(z -lr "$1" 2>&1 | eval $tac)}" )
-		else
-			locations+=( "${(r:10:)0} $HOME" ) # Provide home directory as first result
-			locations+=( "${(@f)$(z -lr 2>&1 | eval $tac)}" )
-		fi
-		# No locations found - First item length is null (from zsh-z)
-		(( ${#locations[1]} == 0 )) && { echo "No directory matches found by zsh-z" >&2 && return 1 } 
-		# One location found - cd to location
-		if (( ${#locations[@]} == 1 )); then
-			local dir=( $(builtin print "${locations[@]}") )
-			shift dir
-			builtin cd "${dir}"
-		# Fuzzy search locations
-		else
-			local dir=( $(builtin print "${(j.\n.)locations[@]}" | fzy) ) && {
-				(( #dir > 0 )) || return 1 # No fuzzy results found
-				shift dir
-				[[ -n $dir ]] && builtin cd "${dir}"
-				zle && builtin zle accept-line
-			}
-		fi
+# Fuzzy search dirstack
+fd() {
+	# Arg exists in PWD or pushd stack navigation
+	if [ -d "$1" ] || [[ "$1" = (-*[0-9]|+*[0-9]) ]]; then
+		builtin cd "$1"
+		return
 	fi
-	[[ $2 == "l" ]] && ls -lah
-	return 0
+	local -a lines dir
+	(($+commands[fzf])) || { print "$0: Function requires fzf" >&2 && return 1 }
+	lines=( "${(f)$(dirs -v)}" ) # Fetch dirstack - f: split expansion to lines
+	(( $#lines > 1 )) && shift lines # Remove first dir from array - PWD
+	if (( $# >= 1 )); then
+		dir=( $(print -l "${lines[@]}" | fzf -0 -q "$1") ) # Search arg in fzf - exit if no results
+	else
+		dir=( $(print -l "${lines[@]}" | fzf) ) # Search dirstack in fzf
+	fi
+	(( ${#dir[1]} == 0 )) && return 1 # No results returned from fzf
+	# Navigate stack based on pushdminus opt
+	[[ -o pushdminus ]] && builtin cd -${dir//[^0-9]} || builtin cd +${dir//[^0-9]}
+	[ "$2" = 'l' ] && ls -lah || : # List directory after cd
+	return $?
 }
-#compdef zshz fcd

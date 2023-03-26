@@ -1,5 +1,6 @@
 -- Vars
-local mash = {"ctrl", "alt", "cmd"}
+hpath = "~/.config/hammerspoon/"
+mash = {"ctrl", "alt", "cmd"}
 
 -- Default alert style
 hs.alert.defaultStyle.strokeColor =  {white = 1, alpha = 0}
@@ -11,64 +12,26 @@ hs.alert.defaultStyle.textSize = 18
 hs.hotkey.bind(mash, "R", function()
 	hs.reload()
 end)
---hs.alert("hsconfig reloaded")
 
--- System event watcher
-function caffeinateWatcher(eventType)
-	if (eventType == hs.caffeinate.watcher.systemDidWake) then -- Wake
-		hs.execute("/Volumes/Dreamer/Documents/Stuff/hibernate.sh restore")
+-- Load SpoonInstall
+local spath = hpath .. 'Spoons/'
+if hs.fs.displayName(spath .. 'SpoonInstall.spoon') then
+	hs.loadSpoon('SpoonInstall') -- Load SpoonInstall
+else
+	if not hs.fs.displayName(spath) then -- Create Spoons directory if required
+		hs.fs.mkdir(spath)
 	end
+	-- Download SpoonInstall spoon, unzip it, remove the zip and load SpoonInstall.
+	hs.fs.chdir(spath)
+	hs.execute('curl -L -o SpoonInstall.spoon.zip https://github.com/Hammerspoon/Spoons/raw/master/Spoons/SpoonInstall.spoon.zip')
+	hs.execute('unzip SpoonInstall.spoon.zip')
+	os.remove('SpoonInstall.spoon.zip')
+	hs.loadSpoon('SpoonInstall')
 end
-sleepWatcher = hs.caffeinate.watcher.new(caffeinateWatcher)
-sleepWatcher:start()
 
--- caffeine - Menu bar icon only displayed when caffeine is on
-local caffeine = hs.menubar.new()
-function setCaffeine(state)
-	if state then
-		if caffeine:isInMenuBar() == false then -- true when object first loads
-			caffeine:returnToMenuBar()
-			caffeine:setIcon("caffeine.pdf")
-		else
-			caffeine:setIcon("caffeine.pdf")
-		end
-	else
-		if caffeine:isInMenuBar() == true then
-			caffeine:removeFromMenuBar()
-		end
-	end
-end
-function caffeineClicked(set)
-    local c = hs.caffeinate
-    if c.get("systemIdle") or c.get("displayIdle") then
-        c.set("systemIdle",nil,true)
-        c.set("displayIdle",nil,true)
-        setCaffeine(nil)
-        return
-    end
-    if set == "display" then
-        if not c.get("displayIdle") then
-            c.set("displayIdle",true,true) -- Prevent display sleep
-        end
-    elseif set == "system" then
-        if not c.get("systemIdle") then
-            c.set("systemIdle",true,true) -- Prevent system sleep
-        end
-    end
-    setCaffeine(true)
-end
-if caffeine then
-	setCaffeine(nil)
-	caffeine:setClickCallback(caffeineClicked)
-end
-hs.hotkey.bind({"ctrl", "alt"}, "C", function() caffeineClicked("display") end)
-hs.hotkey.bind(mash, "C", function() caffeineClicked("system") end)
-
--- My tilde key is broken lol
-function homeChar()
-	hs.eventtap.keyStrokes('~')
-end
-hs.hotkey.bind('option', 'H', homeChar)
+-- Spoons
+spoon.SpoonInstall:andUse('TimeMachineProgress', { start = true })
+-- spoon.SpoonInstall:andUse('Pomodoro', { start = true }) -- TODO: Enable via hot key
 
 -- Open apps
 local application = require "hs.application"
@@ -114,3 +77,45 @@ local systemKey = event:systemKey()
 		return true
 	end
 end):start()
+
+-- caffeine - Menu bar icon only displayed when caffeine is on
+local caffeine = hs.menubar.new()
+function setCaffeine(state)
+	if state then
+		if caffeine:isInMenuBar() == false then -- true when object first loads
+			caffeine:returnToMenuBar()
+			caffeine:setIcon("caffeinate/caffeine.pdf")
+		else
+			caffeine:setIcon("caffeinate/caffeine.pdf")
+		end
+	else
+		if caffeine:isInMenuBar() == true then
+			caffeine:removeFromMenuBar()
+		end
+	end
+end
+function caffeineClicked(set)
+    local c = hs.caffeinate
+    if c.get("systemIdle") or c.get("displayIdle") then
+        c.set("systemIdle",nil,true)
+        c.set("displayIdle",nil,true)
+        setCaffeine(nil)
+        return
+    end
+    if set == "display" then
+        if not c.get("displayIdle") then
+            c.set("displayIdle",true,true) -- Prevent display sleep
+        end
+    elseif set == "system" then
+        if not c.get("systemIdle") then
+            c.set("systemIdle",true,true) -- Prevent system sleep
+        end
+    end
+    setCaffeine(true)
+end
+if caffeine then
+	setCaffeine(nil)
+	caffeine:setClickCallback(caffeineClicked)
+end
+hs.hotkey.bind({"ctrl", "alt"}, "C", function() caffeineClicked("display") end)
+hs.hotkey.bind(mash, "C", function() caffeineClicked("system") end)

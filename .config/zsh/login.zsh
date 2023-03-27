@@ -28,21 +28,20 @@ if [ "$PROMPT_MOTD" ]; then
 		[[ "$PROMPT_MOTDOPT" =~ 'neofetch' && ${+commands[neofetch]} ]] && neofetch || :
 		[[ "$PROMPT_MOTDOPT" =~ 'fastfetch' && ${+commands[fastfetch]} ]] && fastfetch || :
 		_zmotd # Build motd
-		# No plugins installed - display a static motd
-		if [ ! -d $ZDOTDIR/plugins ]; then
-			zmotd
-			return
+		if [ ! -f $HISTFILE ]; then
+			zmotd # Static motd
+		else
+			# Display motd in the zle status line - dmsg function from fpath
+			dmsg "$(zmotd)"
+			# Schedule zle status clear
+			clearmotd() {
+				if ! pgrep fzf > /dev/null; then # fzf not active
+					[[ $WIDGET == *complete* ]] || { zle && zle -M "" }
+				fi
+				unset dm
+			}
+			sched +10 clearmotd # 10s
 		fi
-		# Display motd in the zle status line - dmsg function from fpath
-		dmsg "$(zmotd)"
-		# Schedule zle status clear
-		clearmotd() {
-			if ! pgrep fzf > /dev/null; then # fzf not active
-				[[ $WIDGET == *complete* ]] || { zle && zle -M "" }
-			fi
-			unset dm
-		}
-		sched +10 clearmotd # 10s
 	fi
 fi
 

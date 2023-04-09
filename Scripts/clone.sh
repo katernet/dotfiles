@@ -13,5 +13,3 @@ sleep 5 # Wait for disk to mount
 if [ ! -f /Volumes/$disk/.metadata* ]; then
 	touch /Volumes/$disk/.metadata_never_index_unless_rootfs # Prevent Spotlight indexing disk
 fi
-
-diskutil unmountDisk $disk
